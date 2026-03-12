@@ -38,10 +38,16 @@
 
     --ocean-glow: 190 80% 45%;
     --ocean-deep: 216 50% 5%;
+    --ocean-mid: 210 45% 15%;
+    --ocean-surface: 195 50% 25%;
     --teal: 168 60% 36%;
     --teal-light: 168 50% 50%;
     --coral: 16 80% 60%;
+    --coral-soft: 12 60% 70%;
     --sand: 38 50% 70%;
+    --bioluminescent: 174 72% 50%;
+    --bioluminescent-glow: 174 80% 65%;
+    --kelp: 150 50% 45%;
 
     --sidebar-background: 216 35% 10%;
     --sidebar-foreground: 195 60% 92%;
