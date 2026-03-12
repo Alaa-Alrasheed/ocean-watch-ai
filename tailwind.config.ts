@@ -50,13 +50,23 @@ export default {
         ocean: {
           glow: "hsl(var(--ocean-glow))",
           deep: "hsl(var(--ocean-deep))",
+          mid: "hsl(var(--ocean-mid))",
+          surface: "hsl(var(--ocean-surface))",
         },
         teal: {
           DEFAULT: "hsl(var(--teal))",
           light: "hsl(var(--teal-light))",
         },
-        coral: "hsl(var(--coral))",
+        coral: {
+          DEFAULT: "hsl(var(--coral))",
+          soft: "hsl(var(--coral-soft))",
+        },
         sand: "hsl(var(--sand))",
+        bioluminescent: {
+          DEFAULT: "hsl(var(--bioluminescent))",
+          glow: "hsl(var(--bioluminescent-glow))",
+        },
+        kelp: "hsl(var(--kelp))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
