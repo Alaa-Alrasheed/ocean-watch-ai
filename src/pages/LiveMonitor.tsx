@@ -16,19 +16,8 @@ const LiveMonitor = () => {
   const frame = dataset.frames[currentFrameIdx];
 
   // Auto-play through frames
-  useState(() => {
-    if (!isPlaying) return;
-    const interval = setInterval(() => {
-      setCurrentFrameIdx((prev) => {
-        if (prev >= dataset.frames.length - 1) {
-          setIsPlaying(false);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 2000);
-    return () => clearInterval(interval);
-  });
+  import { useEffect } from "react";
+
 
   // Track which species are detected in current frame
   const activeSpeciesIds = useMemo(
