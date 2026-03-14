@@ -1,20 +1,16 @@
-import { Play, Pause, Image, Eye } from "lucide-react";
+import { Play, Pause, Image } from "lucide-react";
 import { DatasetFrame } from "@/data/monitorDatasets";
-import { useState } from "react";
 
 interface Props {
   frame: DatasetFrame;
   currentIndex: number;
   totalFrames: number;
-  isPlaying: boolean;
-  onTogglePlay: () => void;
+  viewMode: "raw" | "waternet";
 }
 
-const DatasetFrameView = ({ frame, currentIndex, totalFrames, isPlaying, onTogglePlay }: Props) => {
-  const [viewMode, setViewMode] = useState<"raw" | "waternet">("waternet");
-
+const DatasetFrameView = ({ frame, currentIndex, totalFrames, viewMode }: Props) => {
   return (
-    <div className="glass-card rounded-xl overflow-hidden relative">
+    <div className="glass-card rounded-xl overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/30">
         <div className="flex items-center gap-2 text-sm">
@@ -31,39 +27,6 @@ const DatasetFrameView = ({ frame, currentIndex, totalFrames, isPlaying, onToggl
 
       {/* Frame with bounding boxes */}
       <div className="relative bg-ocean-deep aspect-video">
-        {/* Raw vs WaterNet toggle */}
-        <div className="absolute top-3 left-3 z-10 flex rounded-lg overflow-hidden border border-border/40 bg-background/60 backdrop-blur-sm text-xs font-medium">
-          <button
-            onClick={() => setViewMode("raw")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 transition-colors ${
-              viewMode === "raw"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Eye className="w-3 h-3" /> Raw
-          </button>
-          <button
-            onClick={() => setViewMode("waternet")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 transition-colors ${
-              viewMode === "waternet"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Eye className="w-3 h-3" /> WaterNet
-          </button>
-        </div>
-
-        {/* Demo button in corner */}
-        <button
-          onClick={onTogglePlay}
-          className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/80 hover:bg-primary text-primary-foreground text-xs font-medium backdrop-blur-sm transition-colors"
-        >
-          {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-          {isPlaying ? "Pause" : "Demo"}
-        </button>
-
         <div
           className={`w-full h-full flex items-center justify-center transition-all ${
             viewMode === "raw"
