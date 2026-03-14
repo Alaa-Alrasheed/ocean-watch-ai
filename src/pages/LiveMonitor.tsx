@@ -83,8 +83,6 @@ const LiveMonitor = () => {
               currentIndex={currentFrameIdx}
               totalFrames={dataset.frames.length}
               isPlaying={isPlaying}
-              onPrev={() => setCurrentFrameIdx((i) => Math.max(0, i - 1))}
-              onNext={() => setCurrentFrameIdx((i) => Math.min(dataset.frames.length - 1, i + 1))}
               onTogglePlay={() => setIsPlaying(!isPlaying)}
             />
           </div>
