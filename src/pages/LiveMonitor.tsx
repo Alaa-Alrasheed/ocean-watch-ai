@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Database, MapPin, Calendar, Ruler, Clock } from "lucide-react";
+import { Play, Pause, Eye } from "lucide-react";
 import { sampleDatasets } from "@/data/monitorDatasets";
 import { monitorSpecies } from "@/data/marineData";
 import DatasetFrameView from "@/components/monitor/DatasetFrameView";
@@ -11,6 +12,7 @@ const LiveMonitor = () => {
   const [selectedDatasetId, setSelectedDatasetId] = useState(sampleDatasets[0].id);
   const [currentFrameIdx, setCurrentFrameIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [viewMode, setViewMode] = useState<"raw" | "waternet">("waternet");
 
   const dataset = sampleDatasets.find((d) => d.id === selectedDatasetId)!;
   const frame = dataset.frames[currentFrameIdx];
@@ -82,11 +84,43 @@ const LiveMonitor = () => {
               frame={frame}
               currentIndex={currentFrameIdx}
               totalFrames={dataset.frames.length}
-              isPlaying={isPlaying}
-              onTogglePlay={() => setIsPlaying(!isPlaying)}
+              viewMode={viewMode}
             />
           </div>
           <div className="space-y-4">
+            {/* Demo & View Mode controls */}
+            <div className="glass-card rounded-xl p-4 space-y-3">
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
+              >
+                {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                {isPlaying ? "Pause Demo" : "Run Demo"}
+              </button>
+              <div className="flex rounded-lg overflow-hidden border border-border/40 text-xs font-medium">
+                <button
+                  onClick={() => setViewMode("raw")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 transition-colors ${
+                    viewMode === "raw"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/30"
+                  }`}
+                >
+                  <Eye className="w-3 h-3" /> Raw Data
+                </button>
+                <button
+                  onClick={() => setViewMode("waternet")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 transition-colors ${
+                    viewMode === "waternet"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/30"
+                  }`}
+                >
+                  <Eye className="w-3 h-3" /> WaterNet
+                </button>
+              </div>
+            </div>
+
             <TelemetryPanel fps={frame.frameStats.fps} inferenceMs={frame.frameStats.inferenceMs} vram={frame.frameStats.vram} detectionCount={frame.detections.length} />
             <TaxonomyPanel detection={primaryDetection} />
           </div>
