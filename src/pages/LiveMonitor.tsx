@@ -52,7 +52,7 @@ const LiveMonitor = () => {
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold glow-text flex items-center gap-3">
-              Dataset Monitor <span className="text-2xl">🔬</span>
+              Dataset Explorer <span className="text-2xl">🔬</span>
             </h1>
             <p className="text-muted-foreground mt-1">Browse AI detection results across uploaded datasets</p>
           </div>
