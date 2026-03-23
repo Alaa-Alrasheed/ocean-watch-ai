@@ -9,7 +9,7 @@ const Navbar = () => {
 
   const links = [
     { to: "/", label: "Home" },
-    { to: "/live-monitor", label: "Live Monitor" },
+    { to: "/dataset-explorer", label: "Dataset Explorer" },
     { to: "/dashboard", label: "Dashboard" },
     { to: "/upload", label: "Upload" },
     { to: "/feedback", label: "Feedback" },
