@@ -1,5 +1,6 @@
 import { SurveyHeader } from "@/components/dashboard/SurveyHeader";
 import { HealthIndicator } from "@/components/dashboard/HealthIndicator";
+import { BiodiversityScore } from "@/components/dashboard/BiodiversityScore";
 import { SpeciesTable } from "@/components/dashboard/SpeciesTable";
 import { SpeciesChart } from "@/components/dashboard/SpeciesChart";
 import { TemporalChart } from "@/components/dashboard/TemporalChart";
@@ -13,13 +14,14 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <SurveyHeader />
 
-        {/* Biodiversity Indices */}
+        {/* Biodiversity Indices + Composite Score */}
         <section>
           <h2 className="text-lg font-semibold mb-4">Biodiversity Indices</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {biodiversityIndices.map((idx) => (
               <HealthIndicator key={idx.name} index={idx} />
             ))}
+            <BiodiversityScore />
           </div>
         </section>
 
