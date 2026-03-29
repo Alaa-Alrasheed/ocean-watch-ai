@@ -39,11 +39,29 @@ export const speciesData: FishSpecies[] = [
 ];
 
 export const biodiversityIndices: BiodiversityIndex[] = [
-  { name: "Shannon-Wiener (H')", value: 2.18, maxValue: 3.0, description: "Species diversity combining richness and evenness", status: "healthy" },
-  { name: "Simpson's (1-D)", value: 0.87, maxValue: 1.0, description: "Probability two random individuals are different species", status: "healthy" },
-  { name: "Pielou's Evenness (J')", value: 0.78, maxValue: 1.0, description: "How equally species are distributed", status: "moderate" },
-  { name: "Margalef's Richness", value: 1.35, maxValue: 3.0, description: "Species richness relative to sample size", status: "moderate" },
+  { name: "Species Richness", value: 10, maxValue: 20, description: "Total number of distinct species detected in the survey area", status: "moderate" },
+  { name: "Shannon Index (H')", value: 2.18, maxValue: 3.0, description: "Species diversity combining richness and evenness", status: "healthy" },
+  { name: "Simpson Index (1-D)", value: 0.87, maxValue: 1.0, description: "Probability two random individuals are different species", status: "healthy" },
+  { name: "Pielou Evenness (J')", value: 0.78, maxValue: 1.0, description: "How equally species are distributed", status: "moderate" },
 ];
+
+// Composite Biodiversity Score
+// Weights: Shannon 30%, Simpson 25%, Pielou 25%, Species Richness 20%
+export function computeBiodiversityScore(indices: BiodiversityIndex[]): number {
+  const weights: Record<string, number> = {
+    "Species Richness": 0.20,
+    "Shannon Index (H')": 0.30,
+    "Simpson Index (1-D)": 0.25,
+    "Pielou Evenness (J')": 0.25,
+  };
+  let score = 0;
+  for (const idx of indices) {
+    const normalized = (idx.value / idx.maxValue) * 100;
+    const weight = weights[idx.name] ?? 0;
+    score += normalized * weight;
+  }
+  return Math.round(score * 10) / 10;
+}
 
 export const temporalData: DetectionEvent[] = [
   { timestamp: "06:00", speciesCount: 4, totalIndividuals: 23, dominantSpecies: "Rabbitfish" },
