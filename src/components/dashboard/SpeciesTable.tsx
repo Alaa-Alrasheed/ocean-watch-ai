@@ -22,7 +22,7 @@ export function SpeciesTable({ species }: { species: FishSpecies[] }) {
       </div>
       <div className="overflow-auto max-h-96">
         <table className="w-full">
-          <thead>
+          <thead className="sticky top-0 bg-card z-10">
             <tr className="border-b border-border/30">
               <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Species</th>
               <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Category</th>
