@@ -50,15 +50,10 @@ const DatasetFrameView = ({
               : "bg-gradient-to-b from-ocean-deep via-ocean-mid to-ocean-surface/30"
           }`}
         >
-          {frame.detections.length > 0 ? (
-            <div className="text-center space-y-1">
-              <div className="text-5xl">{frame.detections[0].icon}</div>
-              <p className="text-xs text-muted-foreground font-mono">
-                {viewMode === "raw" ? "Raw frame" : "WaterNet enhanced"}
-              </p>
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground font-mono">No detections in this frame</p>
+          {viewMode === "waternet" && frame.detections.length > 0 && (
+            <p className="absolute bottom-3 left-3 text-[11px] text-muted-foreground/70 font-mono z-10">
+              Hover over boxes to see species
+            </p>
           )}
         </div>
 
