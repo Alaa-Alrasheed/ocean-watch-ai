@@ -1,17 +1,14 @@
 import { useState, useEffect } from "react";
 import { Database, MapPin, Calendar, Ruler, Clock } from "lucide-react";
 import { sampleDatasets } from "@/data/monitorDatasets";
-import { monitorSpecies } from "@/data/marineData";
 import DatasetFrameView from "@/components/monitor/DatasetFrameView";
-import TelemetryPanel from "@/components/monitor/TelemetryPanel";
-import TaxonomyPanel from "@/components/monitor/TaxonomyPanel";
-import SpeciesHUD from "@/components/monitor/SpeciesHUD";
 
 const LiveMonitor = () => {
   const [selectedDatasetId, setSelectedDatasetId] = useState(sampleDatasets[0].id);
   const [currentFrameIdx, setCurrentFrameIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [viewMode, setViewMode] = useState<"raw" | "waternet">("waternet");
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
   const dataset = sampleDatasets.find((d) => d.id === selectedDatasetId)!;
   const frame = dataset.frames[currentFrameIdx];
@@ -26,18 +23,9 @@ const LiveMonitor = () => {
         }
         return prev + 1;
       });
-    }, 2000);
+    }, 2000 / playbackSpeed);
     return () => clearInterval(interval);
-  }, [isPlaying, dataset.frames.length]);
-
-  const speciesWithState = monitorSpecies.map((s) => {
-    const detection = frame.detections.find((d) => d.speciesId === s.id);
-    return { ...s, active: !!detection, confidence: detection?.confidence || 0 };
-  });
-
-  const primaryDetection = frame.detections.length > 0
-    ? frame.detections.reduce((a, b) => (a.confidence > b.confidence ? a : b))
-    : null;
+  }, [isPlaying, dataset.frames.length, playbackSpeed]);
 
   const handleDatasetChange = (id: string) => {
     setSelectedDatasetId(id);
@@ -45,10 +33,15 @@ const LiveMonitor = () => {
     setIsPlaying(false);
   };
 
+  const handleSeek = (index: number) => {
+    setCurrentFrameIdx(index);
+    setIsPlaying(false);
+  };
+
   return (
     <div className="min-h-screen gradient-ocean pt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* Header with inline controls */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold glow-text flex items-center gap-3">
@@ -56,29 +49,16 @@ const LiveMonitor = () => {
             </h1>
             <p className="text-muted-foreground mt-1">Browse AI detection results across uploaded datasets</p>
           </div>
-          <div className="flex items-center gap-4">
-            {/* Demo Mode Toggle */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsPlaying(!isPlaying)}
-                className={`relative w-11 h-6 rounded-full transition-colors ${isPlaying ? "bg-primary" : "bg-secondary/50 border border-border/40"}`}
-              >
-                <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-foreground transition-transform ${isPlaying ? "translate-x-5" : ""}`} />
-              </button>
-              <span className="text-xs font-bold uppercase tracking-wider text-primary">Demo Mode</span>
-            </div>
-
-            {/* Raw / WaterNet Toggle */}
-            <div className="flex items-center gap-1.5 text-xs font-medium">
-              <span className={viewMode === "raw" ? "text-foreground" : "text-muted-foreground"}>Raw Feed</span>
-              <button
-                onClick={() => setViewMode(viewMode === "raw" ? "waternet" : "raw")}
-                className={`relative w-9 h-5 rounded-full transition-colors ${viewMode === "waternet" ? "bg-primary" : "bg-secondary/50 border border-border/40"}`}
-              >
-                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-foreground transition-transform ${viewMode === "waternet" ? "translate-x-4" : ""}`} />
-              </button>
-              <span className={viewMode === "waternet" ? "text-foreground" : "text-muted-foreground"}>Water-Net Restored</span>
-            </div>
+          {/* Raw / WaterNet Toggle */}
+          <div className="flex items-center gap-1.5 text-xs font-medium">
+            <span className={viewMode === "raw" ? "text-foreground" : "text-muted-foreground"}>Raw Feed</span>
+            <button
+              onClick={() => setViewMode(viewMode === "raw" ? "waternet" : "raw")}
+              className={`relative w-9 h-5 rounded-full transition-colors ${viewMode === "waternet" ? "bg-primary" : "bg-secondary/50 border border-border/40"}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-foreground transition-transform ${viewMode === "waternet" ? "translate-x-4" : ""}`} />
+            </button>
+            <span className={viewMode === "waternet" ? "text-foreground" : "text-muted-foreground"}>Water-Net Restored</span>
           </div>
         </div>
 
@@ -103,22 +83,18 @@ const LiveMonitor = () => {
           <span className="flex items-center gap-1.5"><Database className="w-3.5 h-3.5" /> {dataset.totalFrames} frames</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <DatasetFrameView
-              frame={frame}
-              currentIndex={currentFrameIdx}
-              totalFrames={dataset.frames.length}
-              viewMode={viewMode}
-            />
-          </div>
-          <div className="space-y-4">
-            <TelemetryPanel fps={frame.frameStats.fps} inferenceMs={frame.frameStats.inferenceMs} vram={frame.frameStats.vram} detectionCount={frame.detections.length} />
-            <TaxonomyPanel detection={primaryDetection} />
-          </div>
-        </div>
-
-        <SpeciesHUD species={speciesWithState} />
+        {/* Full-width frame viewer */}
+        <DatasetFrameView
+          frame={frame}
+          currentIndex={currentFrameIdx}
+          totalFrames={dataset.frames.length}
+          viewMode={viewMode}
+          isPlaying={isPlaying}
+          playbackSpeed={playbackSpeed}
+          onPlayPause={() => setIsPlaying(!isPlaying)}
+          onSeek={handleSeek}
+          onSpeedChange={setPlaybackSpeed}
+        />
       </div>
     </div>
   );
