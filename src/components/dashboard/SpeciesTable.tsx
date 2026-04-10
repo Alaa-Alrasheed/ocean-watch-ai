@@ -20,7 +20,7 @@ export function SpeciesTable({ species }: { species: FishSpecies[] }) {
         <h2 className="text-lg font-semibold">Species Detection Results</h2>
         <p className="text-sm text-muted-foreground mt-1">AI-classified fish species from underwater video analysis</p>
       </div>
-      <div className="overflow-x-auto">
+      <div className="overflow-auto max-h-96">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border/30">
