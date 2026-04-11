@@ -43,7 +43,7 @@ export function SpeciesChart({ species }: { species: FishSpecies[] }) {
                 background: "hsl(216, 35%, 10%)",
                 border: "1px solid hsl(216, 25%, 18%)",
                 borderRadius: "8px",
-                color: "hsl(195, 60%, 90%)",
+                color: "#ffffff",
                 fontSize: "13px",
               }}
             />

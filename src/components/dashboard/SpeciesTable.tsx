@@ -28,7 +28,7 @@ export function SpeciesTable({ species }: { species: FishSpecies[] }) {
               <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Category</th>
               <th className="text-right px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Count</th>
               <th className="text-right px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Abundance</th>
-              <th className="text-center px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Trend</th>
+              
             </tr>
           </thead>
           <tbody>
@@ -52,7 +52,7 @@ export function SpeciesTable({ species }: { species: FishSpecies[] }) {
                     <span className="font-mono text-sm text-muted-foreground w-12 text-right">{s.percentage}%</span>
                   </div>
                 </td>
-                <td className="px-5 py-3.5 text-center flex justify-center">{trendIcons[s.trend]}</td>
+                
               </tr>
             ))}
           </tbody>
