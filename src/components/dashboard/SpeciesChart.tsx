@@ -46,6 +46,8 @@ export function SpeciesChart({ species }: { species: FishSpecies[] }) {
                 color: "#ffffff",
                 fontSize: "13px",
               }}
+              itemStyle={{ color: "#ffffff" }}
+              labelStyle={{ color: "#ffffff" }}
             />
           </PieChart>
         </ResponsiveContainer>
