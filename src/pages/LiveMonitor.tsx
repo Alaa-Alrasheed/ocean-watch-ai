@@ -80,7 +80,7 @@ const LiveMonitor = () => {
           <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {dataset.date}</span>
           <span className="flex items-center gap-1.5"><Ruler className="w-3.5 h-3.5" /> {dataset.depth}</span>
           <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {dataset.duration}</span>
-          <span className="flex items-center gap-1.5"><Database className="w-3.5 h-3.5" /> {dataset.totalFrames} frames</span>
+          
         </div>
 
         {/* Full-width frame viewer */}
