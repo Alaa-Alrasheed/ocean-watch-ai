@@ -25,7 +25,7 @@ export function SpeciesTable({ species }: { species: FishSpecies[] }) {
           <thead className="sticky top-0 bg-card z-10">
             <tr className="border-b border-border/30">
               <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Species</th>
-              <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Category</th>
+              
               <th className="text-right px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Count</th>
               <th className="text-right px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Abundance</th>
               
@@ -39,9 +39,6 @@ export function SpeciesTable({ species }: { species: FishSpecies[] }) {
                     <p className="font-medium text-sm">{s.name}</p>
                     <p className="text-xs text-muted-foreground italic">{s.scientificName}</p>
                   </div>
-                </td>
-                <td className="px-5 py-3.5">
-                  <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${categoryBadge[s.category]}`}>{s.category}</span>
                 </td>
                 <td className="px-5 py-3.5 text-right font-mono text-sm">{s.count}</td>
                 <td className="px-5 py-3.5 text-right">
