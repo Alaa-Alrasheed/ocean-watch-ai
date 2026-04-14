@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Database, MapPin, Calendar, Ruler, Clock } from "lucide-react";
+import { Database, Calendar, Clock } from "lucide-react";
 import { sampleDatasets } from "@/data/monitorDatasets";
 import DatasetFrameView from "@/components/monitor/DatasetFrameView";
 
