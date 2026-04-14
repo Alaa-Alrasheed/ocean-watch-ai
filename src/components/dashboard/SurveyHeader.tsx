@@ -1,13 +1,9 @@
-import { MapPin, Thermometer, Eye, Clock, Calendar, Waves } from "lucide-react";
+import { Clock, Calendar, Waves } from "lucide-react";
 import { ecosystemSummary } from "@/data/marineData";
 
 const stats = [
-  { icon: MapPin, label: "Location", value: ecosystemSummary.location },
   { icon: Calendar, label: "Survey Date", value: ecosystemSummary.date },
   { icon: Clock, label: "Duration", value: ecosystemSummary.surveyDuration },
-  { icon: Waves, label: "Depth Range", value: ecosystemSummary.depth },
-  { icon: Thermometer, label: "Water Temp", value: ecosystemSummary.waterTemp },
-  { icon: Eye, label: "Visibility", value: ecosystemSummary.visibility },
 ];
 
 export function SurveyHeader() {
