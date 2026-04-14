@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Database, MapPin, Calendar, Ruler, Clock } from "lucide-react";
+import { Database, Calendar, Clock } from "lucide-react";
 import { sampleDatasets } from "@/data/monitorDatasets";
 import DatasetFrameView from "@/components/monitor/DatasetFrameView";
 
@@ -76,9 +76,7 @@ const LiveMonitor = () => {
               ))}
             </select>
           </div>
-          <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {dataset.location}</span>
           <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {dataset.date}</span>
-          <span className="flex items-center gap-1.5"><Ruler className="w-3.5 h-3.5" /> {dataset.depth}</span>
           <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {dataset.duration}</span>
           
         </div>
