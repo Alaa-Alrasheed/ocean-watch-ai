@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Database, Calendar, Clock, Upload as UploadIcon, Video, CheckCircle, Loader2 } from "lucide-react";
+import { Database, Calendar, Clock, Upload as UploadIcon, Video, CheckCircle, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { sampleDatasets } from "@/data/monitorDatasets";
 import DatasetFrameView from "@/components/monitor/DatasetFrameView";
@@ -14,6 +14,7 @@ const LiveMonitor = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const dataset = sampleDatasets.find((d) => d.id === selectedDatasetId)!;
@@ -176,17 +177,34 @@ const LiveMonitor = () => {
 
         {/* Dataset selector & metadata */}
         <div className="glass-card rounded-xl px-5 py-3 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
+          <div className="relative flex items-center gap-2">
             <Database className="w-4 h-4 text-primary" />
-            <select
-              value={selectedDatasetId}
-              onChange={(e) => handleDatasetChange(e.target.value)}
-              className="bg-secondary/30 border border-border/30 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              {sampleDatasets.map((ds) => (
-                <option key={ds.id} value={ds.id}>{ds.name}</option>
-              ))}
-            </select>
+            <div className="relative">
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 bg-secondary border border-border/30 rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+              >
+                {dataset.name}
+                <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+              {dropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 z-50 min-w-[200px] bg-secondary border border-border/30 rounded-lg overflow-hidden shadow-lg">
+                  {sampleDatasets.map((ds) => (
+                    <button
+                      key={ds.id}
+                      onClick={() => { handleDatasetChange(ds.id); setDropdownOpen(false); }}
+                      className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+                        ds.id === selectedDatasetId
+                          ? "bg-primary/20 text-primary"
+                          : "text-foreground hover:bg-primary/10 hover:text-primary"
+                      }`}
+                    >
+                      {ds.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {dataset.date}</span>
           <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {dataset.duration}</span>
