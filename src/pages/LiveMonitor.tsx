@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Database, Calendar, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Database, Calendar, Clock, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { sampleDatasets } from "@/data/monitorDatasets";
 import DatasetFrameView from "@/components/monitor/DatasetFrameView";
 
@@ -48,17 +50,6 @@ const LiveMonitor = () => {
               Data Explorer
             </h1>
             <p className="text-muted-foreground mt-1">Browse AI detection results across uploaded datasets</p>
-          </div>
-          {/* Raw / WaterNet Toggle */}
-          <div className="flex items-center gap-1.5 text-xs font-medium">
-            <span className={viewMode === "raw" ? "text-foreground" : "text-muted-foreground"}>Raw Feed</span>
-            <button
-              onClick={() => setViewMode(viewMode === "raw" ? "waternet" : "raw")}
-              className={`relative w-9 h-5 rounded-full transition-colors ${viewMode === "waternet" ? "bg-primary" : "bg-secondary/50 border border-border/40"}`}
-            >
-              <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-foreground transition-transform ${viewMode === "waternet" ? "translate-x-4" : ""}`} />
-            </button>
-            <span className={viewMode === "waternet" ? "text-foreground" : "text-muted-foreground"}>Water-Net Restored</span>
           </div>
         </div>
 
