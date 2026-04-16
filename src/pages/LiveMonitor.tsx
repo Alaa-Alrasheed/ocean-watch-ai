@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Database, Calendar, Clock, Upload as UploadIcon, Video, CheckCircle, Loader2, ChevronDown } from "lucide-react";
+import { Database, Calendar, Clock, Upload as UploadIcon, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { sampleDatasets, Dataset } from "@/data/monitorDatasets";
 import DatasetFrameView from "@/components/monitor/DatasetFrameView";
@@ -52,7 +52,6 @@ const LiveMonitor = () => {
   const [viewMode, setViewMode] = useState<"raw" | "waternet">("waternet");
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [hasVideo, setHasVideo] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -86,21 +85,16 @@ const LiveMonitor = () => {
     setIsPlaying(false);
   };
 
-  const handleFileSelect = (file: File) => {
-    setUploadedFile(file);
-  };
-
-  const handleProcess = () => {
-    if (!uploadedFile) return;
+  const handleFileSelect = async (file: File) => {
     setProcessing(true);
-    setTimeout(async () => {
-      const newDataset = await makeDatasetFromFile(uploadedFile);
-      setDatasets((prev) => [...prev, newDataset]);
-      setSelectedDatasetId(newDataset.id);
-      setCurrentFrameIdx(0);
-      setProcessing(false);
-      setHasVideo(true);
-    }, 3000);
+    const newDataset = await makeDatasetFromFile(file);
+    setDatasets((prev) => [...prev, newDataset]);
+    setSelectedDatasetId(newDataset.id);
+    setCurrentFrameIdx(0);
+    setIsPlaying(false);
+    setPlaybackSpeed(1);
+    setProcessing(false);
+    setHasVideo(true);
   };
 
   const handleExplorerUpload = async (file: File) => {
@@ -141,8 +135,8 @@ const LiveMonitor = () => {
             onDrop={handleDrop}
             className={`glass-card p-12 text-center transition-all duration-300 cursor-pointer ${
               dragOver ? "border-primary/60 bg-primary/5 teal-glow" : "hover:border-primary/30"
-            }`}
-            onClick={() => fileInputRef.current?.click()}
+            } ${processing ? "pointer-events-none opacity-60" : ""}`}
+            onClick={() => !processing && fileInputRef.current?.click()}
           >
             <input
               ref={fileInputRef}
@@ -155,15 +149,10 @@ const LiveMonitor = () => {
               }}
             />
 
-            {uploadedFile ? (
+            {processing ? (
               <div className="space-y-4">
-                <CheckCircle className="w-12 h-12 text-primary mx-auto" />
-                <div>
-                  <p className="text-lg font-medium">{uploadedFile.name}</p>
-                  <p className="text-sm text-muted-foreground font-mono">
-                    {(uploadedFile.size / 1024 / 1024).toFixed(1)} MB
-                  </p>
-                </div>
+                <Loader2 className="w-12 h-12 text-primary mx-auto animate-spin" />
+                <p className="text-lg font-medium">Loading video...</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -177,39 +166,6 @@ const LiveMonitor = () => {
               </div>
             )}
           </div>
-
-          {uploadedFile && (
-            <div className="space-y-4">
-              <div className="glass-card p-4">
-                <h3 className="text-sm font-medium mb-3">Analysis Options</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {["Species Detection", "Biodiversity Index", "AI Insights", "Track Movement"].map((opt) => (
-                    <label key={opt} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors">
-                      <input type="checkbox" defaultChecked className="accent-primary" />
-                      <span className="text-sm">{opt}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <Button
-                onClick={handleProcess}
-                disabled={processing}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 teal-glow"
-                size="lg"
-              >
-                {processing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Processing...
-                  </>
-                ) : (
-                  <>
-                    <Video className="w-4 h-4" /> Start Analysis
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
         </div>
       </div>
     );
