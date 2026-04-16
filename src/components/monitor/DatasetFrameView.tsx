@@ -70,7 +70,8 @@ const DatasetFrameView = ({
           <video
             ref={videoRef}
             src={videoUrl}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain cursor-pointer"
+            onClick={onPlayPause}
             onTimeUpdate={() => setVideoCurrentTime(videoRef.current?.currentTime ?? 0)}
             onLoadedMetadata={() => setVideoDuration(videoRef.current?.duration ?? 0)}
             onEnded={() => onPlayPause()}
