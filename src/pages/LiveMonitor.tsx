@@ -49,13 +49,19 @@ const LiveMonitor = () => {
   const [selectedDatasetId, setSelectedDatasetId] = useState(sampleDatasets[0].id);
   const [currentFrameIdx, setCurrentFrameIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [viewMode, setViewMode] = useState<"raw" | "waternet">("waternet");
+  const [viewMode] = useState<"raw" | "waternet">("waternet");
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [hasVideo, setHasVideo] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const blobUrlsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    const urls = blobUrlsRef.current;
+    return () => { urls.forEach(URL.revokeObjectURL); };
+  }, []);
 
   const dataset = datasets.find((d) => d.id === selectedDatasetId)!;
   const frame = dataset.frames[currentFrameIdx];
@@ -85,25 +91,25 @@ const LiveMonitor = () => {
     setIsPlaying(false);
   };
 
-  const handleFileSelect = async (file: File) => {
-    setProcessing(true);
-    const newDataset = await makeDatasetFromFile(file);
+  const activateDataset = (newDataset: Dataset) => {
+    if (newDataset.videoUrl) blobUrlsRef.current.push(newDataset.videoUrl);
     setDatasets((prev) => [...prev, newDataset]);
     setSelectedDatasetId(newDataset.id);
     setCurrentFrameIdx(0);
     setIsPlaying(false);
     setPlaybackSpeed(1);
+  };
+
+  const handleFileSelect = async (file: File) => {
+    setProcessing(true);
+    const newDataset = await makeDatasetFromFile(file);
+    activateDataset(newDataset);
     setProcessing(false);
     setHasVideo(true);
   };
 
   const handleExplorerUpload = async (file: File) => {
-    const newDataset = await makeDatasetFromFile(file);
-    setDatasets((prev) => [...prev, newDataset]);
-    setSelectedDatasetId(newDataset.id);
-    setCurrentFrameIdx(0);
-    setIsPlaying(false);
-    setPlaybackSpeed(1);
+    activateDataset(await makeDatasetFromFile(file));
   };
 
   const handleDrop = (e: React.DragEvent) => {
