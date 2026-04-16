@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 import { Database, Calendar, Clock, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { sampleDatasets } from "@/data/monitorDatasets";
@@ -11,6 +10,7 @@ const LiveMonitor = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [viewMode, setViewMode] = useState<"raw" | "waternet">("waternet");
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const dataset = sampleDatasets.find((d) => d.id === selectedDatasetId)!;
   const frame = dataset.frames[currentFrameIdx];
@@ -70,12 +70,23 @@ const LiveMonitor = () => {
           <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {dataset.date}</span>
           <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {dataset.duration}</span>
           <div className="ml-auto">
-            <Link to="/upload">
-              <Button size="sm" className="gap-1.5">
-                <Upload className="w-3.5 h-3.5" />
-                Upload
-              </Button>
-            </Link>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept="video/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) {
+                  // TODO: handle uploaded file
+                  console.log("File selected:", f.name);
+                }
+              }}
+            />
+            <Button size="sm" className="gap-1.5" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="w-3.5 h-3.5" />
+              Upload
+            </Button>
           </div>
         </div>
 
