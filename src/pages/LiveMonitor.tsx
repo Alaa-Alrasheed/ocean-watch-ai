@@ -69,7 +69,14 @@ const LiveMonitor = () => {
           </div>
           <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {dataset.date}</span>
           <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {dataset.duration}</span>
-          
+          <div className="ml-auto">
+            <Link to="/upload">
+              <Button size="sm" className="gap-1.5">
+                <Upload className="w-3.5 h-3.5" />
+                Upload
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Full-width frame viewer */}
