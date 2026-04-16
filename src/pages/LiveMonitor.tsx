@@ -14,6 +14,7 @@ const LiveMonitor = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const dataset = sampleDatasets.find((d) => d.id === selectedDatasetId)!;
