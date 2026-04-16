@@ -69,7 +69,7 @@ const Index = () => {
                 Explore Dashboard <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Link to="/upload">
+            <Link to="/data-explorer">
               <Button size="lg" variant="outline" className="border-border/60 text-foreground hover:bg-muted/50 gap-2 text-base px-8">
                 Upload Video <Video className="w-4 h-4" />
               </Button>
