@@ -1,10 +1,51 @@
 import { useState, useEffect, useRef } from "react";
 import { Database, Calendar, Clock, Upload as UploadIcon, Video, CheckCircle, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { sampleDatasets } from "@/data/monitorDatasets";
+import { sampleDatasets, Dataset } from "@/data/monitorDatasets";
 import DatasetFrameView from "@/components/monitor/DatasetFrameView";
 
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m} min ${s.toString().padStart(2, "0")} sec`;
+}
+
+function probeVideoMetadata(url: string): Promise<{ duration: number }> {
+  return new Promise((resolve) => {
+    const vid = document.createElement("video");
+    vid.preload = "metadata";
+    vid.onloadedmetadata = () => {
+      resolve({ duration: vid.duration });
+      vid.src = "";
+    };
+    vid.onerror = () => resolve({ duration: 0 });
+    vid.src = url;
+  });
+}
+
+async function makeDatasetFromFile(file: File): Promise<Dataset> {
+  const id = `upload-${Date.now()}`;
+  const name = file.name.replace(/\.[^.]+$/, "");
+  // Use file's last-modified date, fall back to today
+  const rawDate = file.lastModified ? new Date(file.lastModified) : new Date();
+  const date = rawDate.toISOString().slice(0, 10);
+  const videoUrl = URL.createObjectURL(file);
+  const { duration } = await probeVideoMetadata(videoUrl);
+  return {
+    id,
+    name,
+    location: "Uploaded",
+    date,
+    totalFrames: sampleDatasets[0].frames.length,
+    duration: duration > 0 ? formatDuration(duration) : "—",
+    depth: "—",
+    frames: sampleDatasets[0].frames,
+    videoUrl,
+  };
+}
+
 const LiveMonitor = () => {
+  const [datasets, setDatasets] = useState<Dataset[]>(sampleDatasets);
   const [selectedDatasetId, setSelectedDatasetId] = useState(sampleDatasets[0].id);
   const [currentFrameIdx, setCurrentFrameIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -17,11 +58,11 @@ const LiveMonitor = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const dataset = sampleDatasets.find((d) => d.id === selectedDatasetId)!;
+  const dataset = datasets.find((d) => d.id === selectedDatasetId)!;
   const frame = dataset.frames[currentFrameIdx];
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || dataset.videoUrl) return;
     const interval = setInterval(() => {
       setCurrentFrameIdx((prev) => {
         if (prev >= dataset.frames.length - 1) {
@@ -32,7 +73,7 @@ const LiveMonitor = () => {
       });
     }, 2000 / playbackSpeed);
     return () => clearInterval(interval);
-  }, [isPlaying, dataset.frames.length, playbackSpeed]);
+  }, [isPlaying, dataset.frames.length, playbackSpeed, dataset.videoUrl]);
 
   const handleDatasetChange = (id: string) => {
     setSelectedDatasetId(id);
@@ -50,12 +91,25 @@ const LiveMonitor = () => {
   };
 
   const handleProcess = () => {
+    if (!uploadedFile) return;
     setProcessing(true);
-    // Simulated processing — after "analysis", show the explorer
-    setTimeout(() => {
+    setTimeout(async () => {
+      const newDataset = await makeDatasetFromFile(uploadedFile);
+      setDatasets((prev) => [...prev, newDataset]);
+      setSelectedDatasetId(newDataset.id);
+      setCurrentFrameIdx(0);
       setProcessing(false);
       setHasVideo(true);
     }, 3000);
+  };
+
+  const handleExplorerUpload = async (file: File) => {
+    const newDataset = await makeDatasetFromFile(file);
+    setDatasets((prev) => [...prev, newDataset]);
+    setSelectedDatasetId(newDataset.id);
+    setCurrentFrameIdx(0);
+    setIsPlaying(false);
+    setPlaybackSpeed(1);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -176,7 +230,7 @@ const LiveMonitor = () => {
         </div>
 
         {/* Dataset selector & metadata */}
-        <div className="glass-card rounded-xl px-5 py-3 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+        <div className="glass-card rounded-xl px-5 py-3 flex flex-wrap items-center gap-6 text-sm text-muted-foreground relative z-20">
           <div className="relative flex items-center gap-2">
             <Database className="w-4 h-4 text-primary" />
             <div className="relative">
@@ -189,7 +243,7 @@ const LiveMonitor = () => {
               </button>
               {dropdownOpen && (
                 <div className="absolute top-full left-0 mt-1 z-50 min-w-[200px] bg-secondary border border-border/30 rounded-lg overflow-hidden shadow-lg">
-                  {sampleDatasets.map((ds) => (
+                  {datasets.map((ds) => (
                     <button
                       key={ds.id}
                       onClick={() => { handleDatasetChange(ds.id); setDropdownOpen(false); }}
@@ -220,7 +274,7 @@ const LiveMonitor = () => {
               accept="video/*"
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) console.log("File selected:", f.name);
+                if (f) handleExplorerUpload(f);
               }}
             />
           </div>
@@ -237,6 +291,7 @@ const LiveMonitor = () => {
           onPlayPause={() => setIsPlaying(!isPlaying)}
           onSeek={handleSeek}
           onSpeedChange={setPlaybackSpeed}
+          videoUrl={dataset.videoUrl}
         />
       </div>
     </div>

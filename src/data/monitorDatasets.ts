@@ -27,6 +27,7 @@ export interface Dataset {
   duration: string;
   depth: string;
   frames: DatasetFrame[];
+  videoUrl?: string;
 }
 
 export const sampleDatasets: Dataset[] = [
