@@ -11,7 +11,7 @@ const Navbar = () => {
     { to: "/", label: "Home" },
     { to: "/data-explorer", label: "Data Explorer" },
     { to: "/dashboard", label: "Dashboard" },
-    { to: "/upload", label: "Upload" },
+    
     { to: "/feedback", label: "Feedback" },
   ];
 

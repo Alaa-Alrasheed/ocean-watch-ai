@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
-import Upload from "./pages/Upload";
+
 import LiveMonitor from "./pages/LiveMonitor";
 import Feedback from "./pages/Feedback";
 import Login from "./pages/Login";
@@ -25,7 +25,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/upload" element={<Upload />} />
+          
           <Route path="/data-explorer" element={<LiveMonitor />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/login" element={<Login />} />
