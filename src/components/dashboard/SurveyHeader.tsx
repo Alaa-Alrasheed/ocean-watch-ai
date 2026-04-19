@@ -32,12 +32,11 @@ export function SurveyHeader() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {[
           { label: "Species Detected", value: ecosystemSummary.totalSpecies, color: "text-primary" },
           { label: "Total Individuals", value: ecosystemSummary.totalIndividuals, color: "text-foreground" },
           { label: "Ecosystem Status", value: "Moderate", color: "text-sand" },
-          { label: "AI Confidence", value: "94.2%", color: "text-bioluminescent-glow" },
         ].map((m) => (
           <div key={m.label} className="glass-card rounded-xl p-4 text-center">
             <p className={`text-2xl md:text-3xl font-bold ${m.color}`}>{m.value}</p>
