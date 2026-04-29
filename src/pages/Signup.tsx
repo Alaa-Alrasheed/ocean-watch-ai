@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Fish, ChevronDown } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Fish, ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -12,6 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { supabase } from "@/lib/supabase";
+import { toast } from "@/hooks/use-toast";
 
 const GENDER_OPTIONS = [
   { value: "male", label: "Male" },
@@ -19,6 +22,14 @@ const GENDER_OPTIONS = [
 ];
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
   const [gender, setGender] = useState("");
   const [genderOpen, setGenderOpen] = useState(false);
   const genderRef = useRef<HTMLDivElement>(null);
@@ -36,6 +47,61 @@ const Signup = () => {
   const selectedLabel =
     GENDER_OPTIONS.find((o) => o.value === gender)?.label ?? "Select";
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Friendly client-side validation — runs before any DB call
+    if (!email.trim() || !password || !phone.trim() || !gender || !organization.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!acceptedTerms) {
+      toast({
+        title: "Terms & Conditions required",
+        description: "Please accept the Terms & Conditions to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          phone,
+          gender,
+          organization,
+          accepted_terms: acceptedTerms,
+        },
+      },
+    });
+    setSubmitting(false);
+
+    if (error) {
+      toast({ title: "Sign-up failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: "Account created",
+      description: "Check your email for a confirmation link, then log in.",
+    });
+    navigate("/login");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
@@ -47,19 +113,19 @@ const Signup = () => {
           <p className="text-sm text-muted-foreground mt-1">Join BioReef.ai</p>
         </div>
 
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="you@example.com" className="bg-muted/30 border-border/50" />
+            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="bg-muted/30 border-border/50" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="••••••••" className="bg-muted/30 border-border/50" />
+            <PasswordInput id="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted/30 border-border/50" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" type="tel" placeholder="+971..." className="bg-muted/30 border-border/50" />
+              <Input id="phone" type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+971..." className="bg-muted/30 border-border/50" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="gender">Gender</Label>
@@ -105,10 +171,10 @@ const Signup = () => {
           </div>
           <div className="space-y-2">
             <Label htmlFor="org">Organization</Label>
-            <Input id="org" placeholder="University / Institution" className="bg-muted/30 border-border/50" />
+            <Input id="org" required value={organization} onChange={(e) => setOrganization(e.target.value)} placeholder="University / Institution" className="bg-muted/30 border-border/50" />
           </div>
           <label className="flex items-start gap-2 text-xs text-muted-foreground">
-            <input type="checkbox" className="accent-primary mt-0.5" />
+            <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="accent-primary mt-0.5" />
             <span>
               I accept the{" "}
               <Dialog>
@@ -252,8 +318,8 @@ const Signup = () => {
               </Dialog>
             </span>
           </label>
-          <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-            Sign up
+          <Button type="submit" disabled={submitting} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign up"}
           </Button>
         </form>
 

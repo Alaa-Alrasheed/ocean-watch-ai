@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Fish, BarChart3, Brain, Video, Waves, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import heroImage from "@/assets/hero-ocean.jpg";
 
 const features = [
@@ -37,6 +38,10 @@ const features = [
 ];
 
 const Index = () => {
+  const { user } = useAuth();
+  const ctaTo = user ? "/dashboard" : "/signup";
+  const ctaLabel = user ? "Open Dashboard" : "Get Started";
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -63,15 +68,10 @@ const Index = () => {
             Detect species, compute biodiversity indices, and generate ecological insights.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/dashboard">
+          <div className="flex justify-center">
+            <Link to={ctaTo}>
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 text-base px-8 teal-glow">
-                Explore Dashboard <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link to="/data-explorer">
-              <Button size="lg" variant="outline" className="border-border/60 text-foreground hover:bg-muted/50 gap-2 text-base px-8">
-                Upload Video <Video className="w-4 h-4" />
+                {ctaLabel} <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
           </div>
@@ -129,9 +129,9 @@ const Index = () => {
               <p className="text-muted-foreground max-w-lg mx-auto mb-8">
                 Start analyzing underwater footage and generating biodiversity reports in minutes.
               </p>
-              <Link to="/signup">
+              <Link to={ctaTo}>
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-8 teal-glow">
-                  Get Started <ArrowRight className="w-4 h-4" />
+                  {ctaLabel} <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>

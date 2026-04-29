@@ -155,3 +155,11 @@
 .wave-animation {
   animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
+
+/* Hide native browser password reveal so we can render our own themed toggle */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+}

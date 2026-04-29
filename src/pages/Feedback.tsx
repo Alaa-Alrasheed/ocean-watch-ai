@@ -1,15 +1,39 @@
 import { useState } from "react";
-import { MessageSquare, Send } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { MessageSquare, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Feedback = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [type, setType] = useState<"feedback" | "ticket">("feedback");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast({ title: "Please log in to submit feedback", variant: "destructive" });
+      navigate("/login");
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("feedback").insert({
+      user_id: user.id,
+      type,
+      subject,
+      message,
+    });
+    setSubmitting(false);
+
+    if (error) {
+      toast({ title: "Submission failed", description: error.message, variant: "destructive" });
+      return;
+    }
     toast({
       title: type === "feedback" ? "Feedback Submitted" : "Support Ticket Created",
       description: type === "feedback"
@@ -72,8 +96,8 @@ const Feedback = () => {
                 placeholder="Describe in detail..."
               />
             </div>
-            <Button type="submit" className="w-full gap-2">
-              <Send className="w-4 h-4" />
+            <Button type="submit" disabled={submitting} className="w-full gap-2">
+              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               {type === "feedback" ? "Submit Feedback" : "Create Ticket"}
             </Button>
           </form>
