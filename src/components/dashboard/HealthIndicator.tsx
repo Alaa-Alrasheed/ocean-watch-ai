@@ -1,19 +1,25 @@
 import { BiodiversityIndex } from "@/data/marineData";
 
 const statusColors = {
-  healthy: "text-bioluminescent",
-  moderate: "text-sand",
-  stressed: "text-accent",
+  healthy: "text-emerald-400",
+  moderate: "text-orange-400",
+  stressed: "text-red-400",
 };
 
 const statusBg = {
-  healthy: "bg-bioluminescent/10",
-  moderate: "bg-sand/10",
-  stressed: "bg-accent/10",
+  healthy: "bg-emerald-500/10",
+  moderate: "bg-orange-500/10",
+  stressed: "bg-red-500/10",
+};
+
+const progressColors = {
+  healthy: "bg-emerald-400",
+  moderate: "bg-orange-400",
+  stressed: "bg-red-500",
 };
 
 export function HealthIndicator({ index }: { index: BiodiversityIndex }) {
-  const pct = (index.value / index.maxValue) * 100;
+  const pct = Math.min((index.value / index.maxValue) * 100, 100);
 
   return (
     <div className="glass-card rounded-xl p-5 space-y-3">
@@ -29,7 +35,7 @@ export function HealthIndicator({ index }: { index: BiodiversityIndex }) {
       </div>
       <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
         <div
-          className="h-full rounded-full bg-primary transition-all duration-1000"
+          className={`h-full rounded-full transition-all duration-1000 ${progressColors[index.status]}`}
           style={{ width: `${pct}%` }}
         />
       </div>

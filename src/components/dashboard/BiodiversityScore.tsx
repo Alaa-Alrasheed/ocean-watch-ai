@@ -1,15 +1,46 @@
-import { biodiversityIndices, computeBiodiversityScore } from "@/data/marineData";
+import type { CompositeStatus } from "@/lib/ruleEngine";
 
-export function BiodiversityScore() {
-  const score = computeBiodiversityScore(biodiversityIndices);
+interface BiodiversityScoreProps {
+  score: number;
+  status: CompositeStatus;
+}
 
-  const getStatus = (s: number) => {
-    if (s >= 75) return { label: "Healthy", color: "text-bioluminescent", bg: "bg-bioluminescent/10", ring: "ring-bioluminescent/30" };
-    if (s >= 50) return { label: "Moderate", color: "text-sand", bg: "bg-sand/10", ring: "ring-sand/30" };
-    return { label: "Stressed", color: "text-destructive", bg: "bg-destructive/10", ring: "ring-destructive/30" };
-  };
+const statusStyle: Record<
+  CompositeStatus,
+  { label: string; color: string; bg: string; ring: string; stroke: string }
+> = {
+  HEALTHY: {
+    label: "Healthy",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+    ring: "ring-emerald-500/30",
+    stroke: "rgb(52 211 153)",
+  },
+  MODERATELY_HEALTHY: {
+    label: "Moderately Healthy",
+    color: "text-emerald-300",
+    bg: "bg-emerald-500/10",
+    ring: "ring-emerald-500/30",
+    stroke: "rgb(110 231 183)",
+  },
+  STRESSED: {
+    label: "Stressed",
+    color: "text-orange-400",
+    bg: "bg-orange-500/10",
+    ring: "ring-orange-500/30",
+    stroke: "rgb(251 146 60)",
+  },
+  CRITICAL: {
+    label: "Critical",
+    color: "text-red-400",
+    bg: "bg-red-500/10",
+    ring: "ring-red-500/30",
+    stroke: "rgb(248 113 113)",
+  },
+};
 
-  const status = getStatus(score);
+export function BiodiversityScore({ score, status }: BiodiversityScoreProps) {
+  const displayStatus = statusStyle[status];
 
   // Circumference for the ring (radius = 54)
   const circumference = 2 * Math.PI * 54;
@@ -32,7 +63,7 @@ export function BiodiversityScore() {
           <circle
             cx="60" cy="60" r="54"
             fill="none"
-            stroke="hsl(var(--primary))"
+            stroke={displayStatus.stroke}
             strokeWidth="8"
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -46,12 +77,12 @@ export function BiodiversityScore() {
         </div>
       </div>
 
-      <span className={`text-xs px-3 py-1 rounded-full font-medium ${status.color} ${status.bg} ring-1 ${status.ring}`}>
-        {status.label}
+      <span className={`text-xs px-3 py-1 rounded-full font-medium ${displayStatus.color} ${displayStatus.bg} ring-1 ${displayStatus.ring}`}>
+        {displayStatus.label}
       </span>
 
       <p className="text-xs text-muted-foreground text-center max-w-xs leading-relaxed">
-        Weighted composite of Species Richness, Shannon, Simpson &amp; Pielou indices
+        Rule-engine composite of Species Richness, Shannon, Simpson &amp; Pielou indices
       </p>
     </div>
   );

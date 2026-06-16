@@ -1,0 +1,26 @@
+{
+  "surveyName": "Fujairah Coast stressed biodiversity fixture",
+  "totalFishCount": 200,
+  "species": [
+    {
+      "speciesName": "Pomacanthus asfur",
+      "speciesCount": 150
+    },
+    {
+      "speciesName": "Rastrelliger kanagurta",
+      "speciesCount": 18
+    },
+    {
+      "speciesName": "Epinephelus fasciatus",
+      "speciesCount": 14
+    },
+    {
+      "speciesName": "Lates calcarifer",
+      "speciesCount": 10
+    },
+    {
+      "speciesName": "Scarus ghobban",
+      "speciesCount": 8
+    }
+  ]
+}

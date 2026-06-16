@@ -44,7 +44,10 @@ export function SpeciesTable({ species }: { species: FishSpecies[] }) {
                 <td className="px-5 py-3.5 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <div className="w-16 h-1.5 rounded-full bg-secondary overflow-hidden">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${s.percentage * 5}%` }} />
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${Math.min(s.percentage, 100)}%` }}
+                      />
                     </div>
                     <span className="font-mono text-sm text-muted-foreground w-12 text-right">{s.percentage}%</span>
                   </div>

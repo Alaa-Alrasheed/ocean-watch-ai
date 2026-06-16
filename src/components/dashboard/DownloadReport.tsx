@@ -15,7 +15,7 @@ export function DownloadReport() {
       <div>
         <h3 className="font-semibold">Download Full Report</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Export complete biodiversity assessment with charts, indices, and AI interpretation as PDF
+          Export charts, indices, and rule-engine output as PDF
         </p>
       </div>
       <Button onClick={handleDownload} className="gap-2">
