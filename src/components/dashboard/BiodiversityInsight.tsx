@@ -1,5 +1,5 @@
 import { useMemo, type ReactNode } from "react";
-import { AlertTriangle, Info, ListChecks, ShieldQuestion } from "lucide-react";
+import { AlertTriangle, Info, ListChecks } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -306,41 +306,6 @@ function ConfidenceExplanation({
   );
 }
 
-function CountDataLimitations() {
-  const limitations = [
-    "cause of stress or dominance",
-    "habitat condition",
-    "seasonal or temporal trend",
-    "fishing pressure or pollution",
-    "regional baseline comparison",
-  ];
-
-  return (
-    <div className="flex gap-3 border-b border-border/40 bg-sand/5 px-5 py-4">
-      <ShieldQuestion className="mt-0.5 h-4 w-4 shrink-0 text-sand" aria-hidden="true" />
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-sand">
-          What count data cannot infer
-        </p>
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          The current dataset supports biodiversity structure from species counts only.
-          It cannot independently determine:
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {limitations.map((item) => (
-            <span
-              key={item}
-              className="rounded-full bg-background/30 px-2 py-0.5 text-[11px] text-muted-foreground ring-1 ring-border/40"
-            >
-              {item}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function DatasetSizeLimitation({
   sampleSize,
   totalCount,
@@ -459,13 +424,6 @@ export default function BiodiversityInsight({
 
       <DatasetSizeLimitation sampleSize={bands.sampleSize} totalCount={indices.totalCount} />
       <TaxonomicBreadthLimitation speciesCount={indices.S} />
-      <ConfidenceExplanation
-        patterns={patterns}
-        sampleSize={bands.sampleSize}
-        totalCount={indices.totalCount}
-      />
-      <CountDataLimitations />
-
       <div className="space-y-5 px-5 py-4">
         {openingParagraph && (
           <ReportSection label="01" title="Main finding">
@@ -529,12 +487,16 @@ export default function BiodiversityInsight({
         <Accordion type="single" collapsible className="border-t border-border/40 pt-2">
           <AccordionItem value="scientific-context" className="border-b-0">
             <AccordionTrigger className="py-3 text-sm font-semibold hover:no-underline">
-              Scientific context &amp; limitations
+              Scientific context &amp; confidence
             </AccordionTrigger>
             <AccordionContent className="pb-0">
               <div className="overflow-hidden rounded-md border border-border/40">
                 <ScientificUseDisclaimer />
-                <CountDataLimitations />
+                <ConfidenceExplanation
+                  patterns={patterns}
+                  sampleSize={bands.sampleSize}
+                  totalCount={indices.totalCount}
+                />
               </div>
             </AccordionContent>
           </AccordionItem>

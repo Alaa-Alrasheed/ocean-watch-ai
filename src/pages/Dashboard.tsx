@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { SurveyHeader } from "@/components/dashboard/SurveyHeader";
 import { HealthIndicator } from "@/components/dashboard/HealthIndicator";
 import { BiodiversityScore } from "@/components/dashboard/BiodiversityScore";
-import { SpeciesTable } from "@/components/dashboard/SpeciesTable";
 import { SpeciesChart } from "@/components/dashboard/SpeciesChart";
 import { DatasetSummary } from "@/components/dashboard/DatasetSummary";
 import { AbundanceProfile } from "@/components/dashboard/AbundanceProfile";
@@ -317,10 +316,6 @@ const Dashboard = () => {
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
           <SpeciesChart species={dashboardSpeciesData} />
           <AbundanceProfile species={dashboardSpeciesData} />
-        </section>
-
-        <section>
-          <SpeciesTable species={dashboardSpeciesData} />
         </section>
 
         <section>

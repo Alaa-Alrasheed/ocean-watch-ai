@@ -37,7 +37,7 @@ export function AbundanceProfile({ species }: AbundanceProfileProps) {
   const sortedSpecies = [...species].sort((a, b) => b.count - a.count);
   const dominant = sortedSpecies[0];
   const band = dominanceBand(dominant?.percentage ?? 0);
-  const shouldScroll = sortedSpecies.length > 5;
+  const shouldScroll = sortedSpecies.length > 6;
 
   return (
     <div className="glass-card rounded-xl p-5">
@@ -45,10 +45,10 @@ export function AbundanceProfile({ species }: AbundanceProfileProps) {
         <div>
           <div className="mb-1 flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-primary" aria-hidden="true" />
-            <h2 className="text-lg font-semibold">Ranked Abundance Profile</h2>
+            <h2 className="text-lg font-semibold">Species Abundance Records</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Count-derived dominance and species contribution.
+            Complete ranked count list with each species' proportional share.
           </p>
         </div>
 
@@ -63,45 +63,44 @@ export function AbundanceProfile({ species }: AbundanceProfileProps) {
           No positive species counts are available for ranking.
         </div>
       ) : (
-        <div
-          className={`space-y-3 ${
+        <div className="rounded-lg border border-border/40 bg-background/15">
+          <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_auto_auto] gap-3 border-b border-border/40 px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <span>Rank</span>
+            <span>Species</span>
+            <span className="text-right">Count</span>
+            <span className="text-right">Share</span>
+          </div>
+          <div
+            className={`divide-y divide-border/30 ${
             shouldScroll
-              ? "max-h-[22rem] overflow-y-auto overscroll-contain pr-2"
+              ? "max-h-[22rem] overflow-y-auto overscroll-contain"
               : ""
           }`}
-        >
-          {sortedSpecies.map((item, index) => {
-            const isDominant = index === 0;
-            const fill = isDominant ? band.fill : "bg-primary";
+          >
+            {sortedSpecies.map((item, index) => {
+              const isDominant = index === 0;
+              const fill = isDominant ? band.fill : "bg-primary";
 
-            return (
-              <div key={item.id} className="space-y-1.5">
-                <div className="flex items-baseline justify-between gap-3">
-                  <div className="min-w-0">
+              return (
+                <div key={item.id} className="group relative overflow-hidden px-3 py-2.5 hover:bg-secondary/20">
+                  <div
+                    className={`absolute inset-x-0 bottom-0 h-0.5 opacity-70 ${fill}`}
+                    style={{ width: `${Math.min(item.percentage, 100)}%` }}
+                  />
+                  <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_auto_auto] items-center gap-3">
+                    <span className="font-mono text-xs text-muted-foreground">{index + 1}</span>
                     <p className="truncate text-sm font-medium italic text-foreground">
                       {item.scientificName}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      Rank {index + 1}
-                    </p>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <p className="font-mono text-sm text-foreground">{item.count}</p>
-                    <p className="font-mono text-[11px] text-muted-foreground">
+                    <span className="font-mono text-sm text-foreground">{item.count}</span>
+                    <span className="font-mono text-xs text-muted-foreground">
                       {item.percentage}%
-                    </p>
+                    </span>
                   </div>
                 </div>
-
-                <div className="h-2 overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className={`h-full rounded-full transition-all duration-1000 ${fill}`}
-                    style={{ width: `${Math.min(item.percentage, 100)}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
