@@ -329,7 +329,11 @@ const Dashboard = () => {
         </section>
 
         <section>
-          <DownloadReport />
+          <DownloadReport
+            surveyName={activeDataset.surveyName}
+            species={dashboardSpeciesData}
+            output={ruleEngineOutput}
+          />
         </section>
 
         <footer className="border-t border-border/30 py-6 text-center text-xs text-muted-foreground">
