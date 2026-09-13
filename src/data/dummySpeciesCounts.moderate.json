@@ -1,0 +1,19 @@
+{
+  "surveyName": "Moderate biodiversity fixture",
+  "expectedCompositeStatus": "MODERATELY_HEALTHY",
+  "totalFishCount": 150,
+  "species": [
+    { "speciesName": "Pomacanthus asfur", "speciesCount": 35 },
+    { "speciesName": "Rastrelliger kanagurta", "speciesCount": 25 },
+    { "speciesName": "Epinephelus fasciatus", "speciesCount": 20 },
+    { "speciesName": "Lates calcarifer", "speciesCount": 15 },
+    { "speciesName": "Scarus ghobban", "speciesCount": 12 },
+    { "speciesName": "Siganus canaliculatus", "speciesCount": 10 },
+    { "speciesName": "Lethrinus nebulosus", "speciesCount": 8 },
+    { "speciesName": "Lutjanus argentimaculatus", "speciesCount": 7 },
+    { "speciesName": "Epinephelus coioides", "speciesCount": 6 },
+    { "speciesName": "Acanthurus sohal", "speciesCount": 5 },
+    { "speciesName": "Caranx sexfasciatus", "speciesCount": 4 },
+    { "speciesName": "Platax teira", "speciesCount": 3 }
+  ]
+}

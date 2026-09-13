@@ -14,6 +14,7 @@ export interface BiodiversityIndex {
   name: string;
   value: number;
   maxValue: number;
+  scaleLabel?: string;
   description: string;
   status: "healthy" | "moderate" | "stressed";
 }
@@ -84,32 +85,12 @@ export const ecosystemSummary = {
   visibility: "12m",
 };
 
-export const llmInterpretation = `## Ecosystem Health Assessment — Fujairah Coast
+export const llmInterpretation = `## Count-Based Biodiversity Assessment
 
-Based on the computed biodiversity indices and species detection data, the marine ecosystem at Fujairah shows **moderately healthy** conditions with some areas of concern.
-
-### Key Findings
-
-**Positive Indicators:**
-- The Shannon-Wiener index (H' = 2.18) suggests **good species diversity**, indicating a relatively complex community structure with multiple trophic levels represented.
-- Simpson's index (1-D = 0.87) confirms **low dominance** — no single species overwhelmingly dominates the assemblage, which is characteristic of a balanced ecosystem.
-- Three species show increasing trends (Yellowbar Angelfish, Indian Mackerel, Parrotfish), suggesting favorable conditions for herbivorous and mid-trophic species.
-
-**Areas of Concern:**
-- Pielou's evenness (J' = 0.78) indicates **moderate unevenness** in species distribution. The Indian Mackerel and Arabian Angelfish together represent over 30% of all observations.
-- Declining trends in Blacktip Grouper and Barramundi may signal **fishing pressure on predatory species**, a common early warning of trophic cascade risk.
-- Margalef's richness (1.35) is moderate, suggesting the area could support higher species diversity if environmental pressures were reduced.
-
-### Ecological Interpretation
-
-The community structure is consistent with a **recovering reef system** that still experiences moderate anthropogenic pressure. The increasing abundance of herbivorous species (Parrotfish, Rabbitfish) is encouraging for coral reef health, as these species play a critical role in algae control. However, the declining predator populations warrant monitoring to prevent trophic imbalance.
-
-### Recommendations
-
-1. **Continue monitoring** predator species (Groupers, Barramundi) for population trends
-2. **Investigate** potential causes of predator decline (overfishing, habitat loss)
-3. **Establish baseline** surveys at additional sites for spatial comparison
-4. **Consider seasonal** surveys to capture migration and spawning patterns`;
+This legacy placeholder has been superseded by the deterministic biodiversity rule engine.
+Current dashboard insights should be generated only from supplied species names and count
+data, then interpreted as screening support rather than as a diagnosis of ecosystem cause,
+trend, fishing pressure, habitat quality, or regional condition.`;
 
 // Live Monitor data
 export interface MonitorSpecies {

@@ -1,11 +1,5 @@
-import { Clock, Calendar, Waves } from "lucide-react";
-import { ecosystemSummary } from "@/data/marineData";
+import { Database, Waves } from "lucide-react";
 import type { CompositeStatus } from "@/lib/ruleEngine";
-
-const stats = [
-  { icon: Calendar, label: "Survey Date", value: ecosystemSummary.date },
-  { icon: Clock, label: "Duration", value: ecosystemSummary.surveyDuration },
-];
 
 interface SurveyHeaderProps {
   totalSpecies?: number;
@@ -21,8 +15,8 @@ const statusDisplay: Record<CompositeStatus, { label: string; color: string }> =
 };
 
 export function SurveyHeader({
-  totalSpecies = ecosystemSummary.totalSpecies,
-  totalIndividuals = ecosystemSummary.totalIndividuals,
+  totalSpecies = 0,
+  totalIndividuals = 0,
   ecosystemStatus = "MODERATELY_HEALTHY",
 }: SurveyHeaderProps) {
   const status = statusDisplay[ecosystemStatus];
@@ -35,21 +29,23 @@ export function SurveyHeader({
           <span>MARINE BIODIVERSITY MONITOR</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight glow-text">
-          Fujairah Ecosystem Analysis
+          Biodiversity Count Analysis
         </h1>
         <p className="text-muted-foreground mt-2 max-w-2xl">
-          Species detections, diversity indices, and rule-based ecological flags.
+          Species-count input, biodiversity indices, composite score, and rule-based
+          ecological flags.
         </p>
       </div>
 
       <div className="flex flex-wrap gap-3">
-        {stats.map((s) => (
-          <div key={s.label} className="glass-card rounded-lg px-3.5 py-2 flex items-center gap-2 text-sm">
-            <s.icon className="w-3.5 h-3.5 text-primary shrink-0" />
-            <span className="text-muted-foreground">{s.label}:</span>
-            <span className="font-medium text-foreground">{s.value}</span>
-          </div>
-        ))}
+        <div className="glass-card rounded-lg px-3.5 py-2 flex items-center gap-2 text-sm">
+          <Database className="w-3.5 h-3.5 text-primary shrink-0" />
+          <span className="text-muted-foreground">Input basis:</span>
+          <span className="font-medium text-foreground">species names + counts</span>
+        </div>
+        <div className="glass-card rounded-lg px-3.5 py-2 text-sm text-muted-foreground">
+          No site, time, method, habitat, or baseline metadata supplied
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

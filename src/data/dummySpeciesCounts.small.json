@@ -1,0 +1,10 @@
+{
+  "surveyName": "Small insufficient dataset fixture",
+  "expectedCompositeStatus": "CRITICAL",
+  "totalFishCount": 11,
+  "species": [
+    { "speciesName": "Pomacanthus asfur", "speciesCount": 7 },
+    { "speciesName": "Scarus ghobban", "speciesCount": 3 },
+    { "speciesName": "Lates calcarifer", "speciesCount": 1 }
+  ]
+}

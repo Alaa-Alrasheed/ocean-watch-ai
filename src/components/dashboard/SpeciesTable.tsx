@@ -1,63 +1,86 @@
+import { ChevronDown, Table2 } from "lucide-react";
 import { FishSpecies } from "@/data/marineData";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
-
-const trendIcons = {
-  increasing: <TrendingUp className="w-4 h-4 text-bioluminescent" />,
-  stable: <Minus className="w-4 h-4 text-muted-foreground" />,
-  decreasing: <TrendingDown className="w-4 h-4 text-accent" />,
-};
-
-const categoryBadge = {
-  reef: "bg-bioluminescent/10 text-bioluminescent",
-  pelagic: "bg-sand/10 text-sand",
-  demersal: "bg-coral-soft/10 text-coral-soft",
-};
 
 export function SpeciesTable({ species }: { species: FishSpecies[] }) {
+  const sortedSpecies = [...species].sort((a, b) => b.count - a.count);
+
   return (
-    <div className="glass-card rounded-xl overflow-hidden">
-      <div className="p-5 border-b border-border/50">
-        <h2 className="text-lg font-semibold">Species Detection Results</h2>
-        <p className="text-sm text-muted-foreground mt-1">AI-classified fish species from underwater video analysis</p>
+    <details className="group glass-card overflow-hidden rounded-xl">
+      <summary className="flex cursor-pointer list-none flex-col gap-3 p-5 transition-colors hover:bg-secondary/20 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-3">
+          <Table2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+          <div>
+            <h2 className="text-lg font-semibold">Raw Species Count Records</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Collapsed to avoid duplicating the ranked abundance profile.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <span>{sortedSpecies.length} taxa</span>
+          <ChevronDown
+            className="h-4 w-4 transition-transform group-open:rotate-180"
+            aria-hidden="true"
+          />
+        </div>
+      </summary>
+
+      <div className="border-t border-border/50">
+        {sortedSpecies.length === 0 ? (
+          <p className="p-5 text-sm text-muted-foreground">
+            No positive species counts are available for this dataset.
+          </p>
+        ) : (
+          <div className="max-h-[28rem] overflow-auto">
+            <table className="w-full">
+              <thead className="sticky top-0 z-10 bg-card">
+                <tr className="border-b border-border/30">
+                  <th className="px-5 py-3 text-left font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    Rank
+                  </th>
+                  <th className="px-5 py-3 text-left font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    Species
+                  </th>
+                  <th className="px-5 py-3 text-right font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    Count
+                  </th>
+                  <th className="px-5 py-3 text-right font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    Share
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedSpecies.map((s, index) => (
+                  <tr
+                    key={s.id}
+                    className="border-b border-border/20 transition-colors hover:bg-secondary/30"
+                  >
+                    <td className="px-5 py-3.5 font-mono text-sm text-muted-foreground">
+                      {index + 1}
+                    </td>
+                    <td className="min-w-56 px-5 py-3.5">
+                      <div className="max-w-xl">
+                        <p className="text-sm font-medium italic">
+                          {s.scientificName}
+                        </p>
+                        {s.name !== s.scientificName && (
+                          <p className="text-xs text-muted-foreground">{s.name}</p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5 text-right font-mono text-sm">
+                      {s.count}
+                    </td>
+                    <td className="px-5 py-3.5 text-right font-mono text-sm text-muted-foreground">
+                      {s.percentage}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-      <div className="overflow-auto max-h-96">
-        <table className="w-full">
-          <thead className="sticky top-0 bg-card z-10">
-            <tr className="border-b border-border/30">
-              <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Species</th>
-              
-              <th className="text-right px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Count</th>
-              <th className="text-right px-5 py-3 text-xs font-mono text-muted-foreground uppercase tracking-wider">Abundance</th>
-              
-            </tr>
-          </thead>
-          <tbody>
-            {species.map((s) => (
-              <tr key={s.id} className="border-b border-border/20 hover:bg-secondary/30 transition-colors">
-                <td className="px-5 py-3.5">
-                  <div>
-                    <p className="font-medium text-sm">{s.name}</p>
-                    <p className="text-xs text-muted-foreground italic">{s.scientificName}</p>
-                  </div>
-                </td>
-                <td className="px-5 py-3.5 text-right font-mono text-sm">{s.count}</td>
-                <td className="px-5 py-3.5 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <div className="w-16 h-1.5 rounded-full bg-secondary overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-primary"
-                        style={{ width: `${Math.min(s.percentage, 100)}%` }}
-                      />
-                    </div>
-                    <span className="font-mono text-sm text-muted-foreground w-12 text-right">{s.percentage}%</span>
-                  </div>
-                </td>
-                
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    </details>
   );
 }

@@ -1,0 +1,8 @@
+{
+  "surveyName": "Single-species dataset fixture",
+  "expectedCompositeStatus": "CRITICAL",
+  "totalFishCount": 45,
+  "species": [
+    { "speciesName": "Pomacanthus asfur", "speciesCount": 45 }
+  ]
+}

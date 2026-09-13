@@ -70,6 +70,36 @@
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }
 
+  /* Keep overflow areas visually consistent with the ocean dashboard theme. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--teal-light) / 0.7) hsl(var(--ocean-deep) / 0.55);
+  }
+
+  *::-webkit-scrollbar {
+    width: 0.625rem;
+    height: 0.625rem;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: hsl(var(--ocean-deep) / 0.55);
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--bioluminescent) / 0.8),
+      hsl(var(--teal) / 0.85)
+    );
+    border: 2px solid hsl(var(--ocean-deep) / 0.55);
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--bioluminescent));
+  }
+
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }

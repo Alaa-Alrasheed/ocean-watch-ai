@@ -35,7 +35,7 @@ export type ParagraphType  =
 export interface ComputedIndices {
   S: number;                   // Species richness (integer)
   H: number;                   // Shannon diversity (2 dp)
-  D: number;                   // Simpson diversity (2 dp)
+  D: number;                   // Gini-Simpson diversity, 1-D (2 dp)
   J: number;                   // Pielou evenness (2 dp)
   totalCount: number;          // Total individual detections
   dominantSpecies: string;     // Name of most abundant species
@@ -86,17 +86,20 @@ export interface RuleEngineOutput {
  * Matches the ">50 = Very High" upper boundary in report Table 2.
  * Values above S_MAX are capped at 100 in the normalised score.
  */
-const S_MAX = 50;
+export const RICHNESS_SCORE_CAP = 50;
+const S_MAX = RICHNESS_SCORE_CAP;
 
 /**
  * Shannon normalisation divisor. The report specifies: Shannon score = (H'/4) × 100.
  * In practice H' rarely exceeds 4 for finite species counts in survey data.
  */
-const H_NORM = 4;
+export const SHANNON_SCORE_CAP = 4;
+const H_NORM = SHANNON_SCORE_CAP;
 
 /** Detection count thresholds for sample size adequacy. */
 export const SAMPLE_ADEQUATE  = 30;
 export const SAMPLE_MARGINAL  = 15;
+export const LOW_TAXA_WARNING_THRESHOLD = 3;
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
@@ -134,7 +137,7 @@ export function computeIndices(counts: SpeciesCounts): ComputedIndices | null {
     0
   );
 
-  // Simpson Diversity: D = 1 − Σ pi²
+  // Gini-Simpson Diversity: 1-D = 1 - sum(pi^2)
   const D = 1 - proportions.reduce((sum, p) => sum + p * p, 0);
 
   // Pielou Evenness: J = H' / ln(S)
@@ -185,7 +188,7 @@ export function computeIndices(counts: SpeciesCounts): ComputedIndices | null {
  *   Shannon   → Table 3  (report Section 5.1)
  *   Pielou    → Table 4  (report Section 5.1)
  *   Composite → Table 6  (report Section 5.2)
- *   Simpson   → Derived from the 0–1 range description in Section 5.1.
+ *   Simpson   → Derived from the 0-1 range description in Section 5.1.
  *               The report defines 0 = maximum dominance, 1 = even distribution.
  *               Bands: LOW < 0.3 ≤ MODERATE < 0.6 ≤ HIGH.
  */
@@ -292,19 +295,18 @@ export function detectPatterns(
         `Multiple biodiversity dimensions simultaneously indicate ecological concern. ` +
         `Species richness is low (S = ${S}), Shannon diversity is ` +
         `${shannonLabel(bands.shannon)} (H = ${H}), Pielou evenness is low (J = ${J}), ` +
-        `and Simpson diversity is low (D = ${D}). ${dominantSpecies} accounts for ` +
+        `and Gini-Simpson diversity is low (1-D = ${D}). ${dominantSpecies} accounts for ` +
         `${dominantPct}% of all detections (${dominantCount} of ${totalCount} individuals). ` +
-        `These four indices collectively characterise a community structure that is compromised ` +
-        `across species variety, distributional balance, and dominance — a multi-dimensional ` +
-        `signal that is more ecologically reliable than any single index considered in isolation.`,
+        `These four indices collectively characterise a count distribution with low variety, ` +
+        `reduced balance, and high dominance. This is an internally consistent screening ` +
+        `signal, but it is not a standalone diagnosis of ecosystem condition.`,
       limitation:
         `When multiple indices are simultaneously depressed, individual index limitations ` +
         `compound. This assessment should be treated as directionally consistent rather than ` +
         `precisely quantified${sampleNote(bands.sampleSize, totalCount)}.`,
       nextStep:
-        `Prioritise a comprehensive follow-up survey with expanded spatial and temporal ` +
-        `coverage to determine whether this pattern is spatially localised or indicative ` +
-        `of a broader ecosystem-level trend.`,
+        `Prioritise replicate species-count datasets and species-identification review ` +
+        `to determine whether this pattern persists beyond a single count distribution.`,
     });
   }
 
@@ -333,15 +335,14 @@ export function detectPatterns(
         `Species richness is low at S = ${S}, with only ${S} distinct ` +
         `${S === 1 ? "species" : "species"} detected across ${totalCount} total ` +
         `observations. This falls below the minimum threshold of 10 species considered ` +
-        `indicative of adequate ecological variety.${shannonNote}`,
+        `used for the project rule set's moderate-richness band.${shannonNote}`,
       limitation:
         `Species richness estimates are sensitive to sampling effort; limited survey ` +
         `duration or a restricted survey area may underestimate true local diversity` +
         `${sampleNote(bands.sampleSize, totalCount)}.`,
       nextStep:
-        `Expand the survey area and duration, and cross-reference with regional species ` +
-        `inventories to determine whether low richness reflects genuine ecosystem stress ` +
-        `or insufficient sampling coverage.`,
+        `Repeat or expand count sampling and verify species identifications to determine ` +
+        `whether low richness reflects the sampled assemblage or limited detection coverage.`,
     });
   }
 
@@ -364,7 +365,7 @@ export function detectPatterns(
       confidence: conf,
       findingParagraph:
         `Despite ${richnessLabel(bands.richness)} species richness (S = ${S}), ` +
-        `community abundance is severely skewed. ${dominantSpecies} accounts for ` +
+        `community abundance is strongly skewed. ${dominantSpecies} accounts for ` +
         `${dominantPct}% of all detections, compressing Pielou evenness to J = ${J} — ` +
         `below the 0.4 threshold for balanced community structure. Shannon diversity ` +
         `(H = ${H}) reflects this distributional imbalance.`,
@@ -373,8 +374,8 @@ export function detectPatterns(
         `may inflate dominance estimates if transient or schooling behaviour is captured ` +
         `disproportionately${sampleNote(bands.sampleSize, totalCount)}.`,
       nextStep:
-        `Conduct temporally replicated surveys to determine whether the observed dominance ` +
-        `pattern is persistent or reflects a transient snapshot of normal schooling behaviour.`,
+        `Collect replicate species-count datasets to determine whether the observed dominance ` +
+        `pattern is persistent or a one-sample abundance skew.`,
     });
   }
 
@@ -396,7 +397,7 @@ export function detectPatterns(
       severity,
       confidence: conf,
       findingParagraph:
-        `Overall community diversity is below expected levels. Shannon diversity is ` +
+        `Overall diversity is in the rule set's lower band. Shannon diversity is ` +
         `${shannonLabel(bands.shannon)} at H = ${H}, indicating that effective diversity ` +
         `is reduced relative to the number of species present (S = ${S}). Pielou evenness ` +
         `(J = ${J}) confirms that abundance distribution is ` +
@@ -407,8 +408,8 @@ export function detectPatterns(
         `disproportionately driven by one or two highly abundant species rather than a ` +
         `uniform decline across all taxa${sampleNote(bands.sampleSize, totalCount)}.`,
       nextStep:
-        `Investigate the abundance distribution of individual species to identify whether ` +
-        `a specific taxon is driving the observed reduction in Shannon diversity.`,
+        `Review the abundance distribution and repeat count sampling to identify whether ` +
+        `one or two taxa consistently drive the reduced Shannon value.`,
     });
   }
 
@@ -430,20 +431,19 @@ export function detectPatterns(
       confidence: conf,
       findingParagraph:
         `${dominantSpecies} represents ${dominantPct}% of all individual detections ` +
-        `(${dominantCount} of ${totalCount} individuals). The Simpson diversity index ` +
+        `(${dominantCount} of ${totalCount} individuals). The Gini-Simpson index ` +
         `of D = ${D} reflects a correspondingly low probability that two randomly selected ` +
         `individuals from this dataset belong to different species. This statistical ` +
         `signature is consistent with a community structure disproportionately influenced ` +
         `by a small number of highly abundant taxa.`,
       limitation:
-        `Simpson diversity is particularly sensitive to the most abundant species in the ` +
+        `Gini-Simpson diversity is sensitive to the most abundant species in the ` +
         `sample; a single highly represented taxon can substantially suppress the index ` +
         `value even when other species are present in adequate numbers` +
         `${sampleNote(bands.sampleSize, totalCount)}.`,
       nextStep:
-        `Assess whether the abundance of ${dominantSpecies} is typical for this survey ` +
-        `location and season by comparing against historical baseline data or adjacent ` +
-        `survey sites.`,
+        `Compare ${dominantSpecies} abundance against replicate count datasets or a verified ` +
+        `local baseline when one becomes available.`,
     });
   }
 
@@ -459,25 +459,25 @@ export function detectPatterns(
       severity,
       confidence: conf,
       findingParagraph:
-        `The composite biodiversity score of ${compositeScore}/100 places the ecosystem ` +
+        `The composite biodiversity score of ${compositeScore}/100 places the sampled assemblage ` +
         `in ${compositeStatusLabel(bands.composite)} status. This score integrates Shannon ` +
-        `diversity (weighted 35%), Simpson diversity (30%), Pielou evenness (20%), and ` +
+        `diversity (weighted 35%), Gini-Simpson diversity (30%), Pielou evenness (20%), and ` +
         `species richness (15%), reflecting the relative ecological significance of each ` +
         `indicator as established in the project's biodiversity framework. A ` +
         `${compositeStatusLabel(bands.composite)} composite rating indicates that the ` +
-        `weighted combination of all four indices reflects a state of ` +
-        `${isCritical ? "serious" : "significant"} biodiversity ` +
-        `${isCritical ? "collapse" : "stress"} across the assessed dimensions.`,
+        `weighted combination of all four indices is ` +
+        `${isCritical ? "very low" : "stressed"} under the current rule set. This is a ` +
+        `screening classification, not a direct diagnosis of ecosystem degradation.`,
       limitation:
         `The composite score is sensitive to the chosen weighting scheme and normalisation ` +
         `bounds; its absolute value should be interpreted alongside the individual index ` +
         `values rather than in isolation.`,
       nextStep:
         isCritical
-          ? `Immediate expanded survey and expert consultation are strongly recommended. ` +
-            `Current findings indicate a state requiring urgent ecological assessment.`
-          : `Schedule a follow-up survey within the next assessment cycle to determine ` +
-            `whether this trend is worsening or showing signs of recovery.`,
+          ? `Immediate replicate count sampling, species-ID quality review, and expert ` +
+            `consultation are strongly recommended before ecological conclusions are drawn.`
+          : `Schedule a follow-up count dataset to determine whether the pattern persists ` +
+            `or changes with additional sampling.`,
     });
   }
 
@@ -549,14 +549,12 @@ export function renderReport(
 
   // ── Synthesis ─────────────────────────────────────────────────────────────
   if (patterns.length > 1) {
-    const labels = patterns.map((p) => p.label);
     paragraphs.push({
       type: "synthesis",
       text:
-        `Taken together, ${formatList(labels)} indicate a low-richness, dominance-weighted ` +
-        `assemblage in this sample rather than a balanced community profile. The signal is ` +
-        `strong enough to prioritise follow-up, but should be checked against site history, ` +
-        `seasonality, and survey design before being treated as a management conclusion. ` +
+        `${buildSynthesis(patterns, indices, bands)} The signal should be checked against replicate ` +
+        `count datasets, species-ID quality, and local baselines when available before ` +
+        `being treated as a management conclusion. ` +
         `Priority: ${conciseNextStep(patterns[0])}.`,
     });
   } else if (patterns.length === 1) {
@@ -564,7 +562,7 @@ export function renderReport(
       type: "recommendation",
       text:
         `Priority: ${conciseNextStep(patterns[0])}. Treat the flag as a screening result ` +
-        `until it is compared with local baselines and survey replication.`,
+        `until it is compared with replicate count datasets or a verified local baseline.`,
     });
   }
 
@@ -575,7 +573,19 @@ export function renderReport(
       text:
         bands.sampleSize === "MARGINAL"
           ? `Sample size note: n=${totalCount}; below recommended n=${SAMPLE_ADEQUATE}. Interpret pattern flags as provisional until additional detections are available.`
-          : `Sample size warning: n=${totalCount}; below minimum n=${SAMPLE_MARGINAL}. Collect more data before ecological inference or comparisons across sites.`,
+            : `Sample size warning: n=${totalCount}; below minimum n=${SAMPLE_MARGINAL}. Collect more data before ecological inference or comparisons across datasets.`,
+    });
+  }
+
+  if (S <= LOW_TAXA_WARNING_THRESHOLD) {
+    paragraphs.push({
+      type: "quality_caveat",
+      text:
+        `Taxonomic breadth warning: S=${S}; only ${S} ` +
+        `${S === 1 ? "taxon was" : "taxa were"} detected. Even when total count is adequate, ` +
+        `three or fewer detected taxa are too few for robust biodiversity interpretation. ` +
+        `Treat diversity, evenness, and composite-score outputs as low-richness screening results ` +
+        `until species IDs, sampling coverage, and replicate count datasets are reviewed.`,
     });
   }
 
@@ -611,7 +621,10 @@ export function runRuleEngine(counts: SpeciesCounts): RuleEngineOutput | null {
     patterns,
     paragraphs,
     compositeStatus: bands.composite,
-    hasWarnings:     bands.sampleSize !== "ADEQUATE" || patterns.length > 0,
+    hasWarnings:
+      bands.sampleSize !== "ADEQUATE" ||
+      indices.S <= LOW_TAXA_WARNING_THRESHOLD ||
+      patterns.length > 0,
     dominantSpecies: indices.dominantSpecies,
   };
 }
@@ -662,12 +675,6 @@ function severityLabel(s: Severity): string {
   return { LOW: "Low", MODERATE: "Moderate", HIGH: "High", CRITICAL: "Critical" }[s];
 }
 
-function formatList(items: string[]): string {
-  if (items.length === 1) return items[0];
-  if (items.length === 2) return `${items[0]} and ${items[1]}`;
-  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
-}
-
 function concisePatternSummary(
   pattern: PatternFamily,
   indices: ComputedIndices,
@@ -679,13 +686,13 @@ function concisePatternSummary(
     case "broad_concern":
       return `Several index dimensions are simultaneously depressed: S=${indices.S}, H'=${indices.H}, 1-D=${indices.D}, and J'=${indices.J}. The dominant taxon accounts for ${dominantPct}% of detections.`;
     case "reduced_variety":
-      return `Only ${indices.S} taxa were detected across n=${indices.totalCount}, placing richness in the ${richnessLabel(bands.richness)} band. Shannon diversity is also ${shannonLabel(bands.shannon)}.`;
+      return `Only ${indices.S} taxa were detected across n=${indices.totalCount}, placing richness in the ${richnessLabel(bands.richness)} band. Shannon diversity is in the ${shannonLabel(bands.shannon)} band.`;
     case "uneven_distribution":
       return `Abundance is concentrated in ${indices.dominantSpecies}, which accounts for ${dominantPct}% of detections; J'=${indices.J}.`;
     case "reduced_balance":
-      return `The combination of H'=${indices.H} and J'=${indices.J} indicates reduced community balance, with the dominant taxon representing ${dominantPct}% of detections.`;
+      return `The combination of H'=${indices.H} and J'=${indices.J} indicates reduced evenness in this count distribution, with the dominant taxon representing ${dominantPct}% of detections.`;
     case "dominance_concern":
-      return `${indices.dominantSpecies} dominates the sample at ${dominantPct}% (${indices.dominantCount}/${indices.totalCount}), with 1-D=${indices.D}.`;
+      return `${indices.dominantSpecies} has the largest share of the sample at ${dominantPct}% (${indices.dominantCount}/${indices.totalCount}), with 1-D=${indices.D}.`;
     case "composite_concern":
       return `The composite score is ${indices.compositeScore}/100, placing the sample in ${compositeStatusLabel(bands.composite)} status under the current rule set.`;
     default:
@@ -698,13 +705,13 @@ function conciseLimitation(pattern: PatternFamily): string {
     case "broad_concern":
       return "Multiple depressed dimensions strengthen the screening signal, but do not identify mechanism or cause";
     case "reduced_variety":
-      return "Richness remains sensitive to survey effort, habitat coverage, and detection probability";
+      return "Richness remains sensitive to sampling effort, species-ID quality, and detection probability";
     case "uneven_distribution":
-      return "Dominance may reflect seasonal aggregation, schooling behaviour, or the timing of the survey window";
+      return "Dominance may reflect a one-sample abundance skew and needs replicate count data";
     case "reduced_balance":
       return "Low H' and J' can be driven by a few abundant taxa rather than broad decline across all taxa";
     case "dominance_concern":
-      return "Compare temporal and adjacent-site baselines before interpreting dominance as ecological stress";
+      return "Compare replicate count datasets before interpreting dominance as persistent ecological structure";
     case "composite_concern":
       return "Composite score depends on project-specific weights and thresholds, so read it alongside the raw indices";
     default:
@@ -715,16 +722,16 @@ function conciseLimitation(pattern: PatternFamily): string {
 function conciseNextStep(pattern: PatternFamily): string {
   switch (pattern.id) {
     case "composite_concern":
-      return "review the index profile with a marine ecologist and expand sampling before drawing management conclusions";
+      return "review the index profile with a marine ecologist and collect replicate count datasets before drawing management conclusions";
     case "reduced_variety":
-      return "verify survey effort and compare richness against local or site-specific species baselines";
+      return "verify species identifications and repeat or expand count sampling";
     case "dominance_concern":
-      return `compare the dominant taxon's abundance against temporal replicates and adjacent-site baselines`;
+      return `compare the dominant taxon's abundance against replicate count datasets`;
     case "broad_concern":
-      return "expand spatial and temporal sampling to test whether the signal persists";
+      return "collect replicate count datasets to test whether the signal persists";
     case "uneven_distribution":
     case "reduced_balance":
-      return "replicate sampling across time windows and habitat strata";
+      return "repeat count sampling and compare the abundance distribution across datasets";
     default:
       return pattern.nextStep;
   }
@@ -743,43 +750,37 @@ function buildSynthesis(
 
   if (ids.has("broad_concern") && ids.has("dominance_concern")) {
     return (
-      `The statistical dominance signal independently corroborates the multi-dimensional ` +
-      `biodiversity depression detected across all index dimensions, confirming that ` +
-      `community skew is the primary structural feature of this dataset.`
+      `The dominance signal is consistent with the multi-index concern, suggesting that ` +
+      `abundance skew is an important structural feature of this count distribution.`
     );
   }
   if (ids.has("uneven_distribution") && ids.has("dominance_concern")) {
     return (
-      `The dominance signal detected by the Simpson index corroborates the distributional ` +
-      `imbalance detected by Pielou evenness, providing consistent evidence of community ` +
-      `skew from two independent measurements.`
+      `The Gini-Simpson and Pielou evenness results both point toward an uneven abundance ` +
+      `distribution, with dominance concentrated in one or a few taxa.`
     );
   }
   if (ids.has("reduced_balance") && ids.has("dominance_concern")) {
     return (
-      `The Simpson dominance signal reinforces the reduced balance finding: both metrics ` +
-      `independently indicate that the community is disproportionately structured around ` +
-      `a small number of highly abundant taxa.`
+      `The Gini-Simpson and Shannon-evenness profile both suggest reduced balance, likely ` +
+      `driven by a small number of highly abundant taxa in this sample.`
     );
   }
   if (ids.has("reduced_variety") && ids.has("composite_concern")) {
     return (
-      `The low species count and the depressed composite score converge on the same ` +
-      `conclusion: the assessed community represents a substantially impoverished ` +
-      `biodiversity state across multiple measurement frameworks.`
+      `Low detected richness and the composite score point in the same direction: this ` +
+      `count sample has a limited biodiversity profile under the current rule set.`
     );
   }
   if (ids.has("broad_concern") && ids.has("composite_concern")) {
     return (
-      `The composite score independently corroborates the multi-index finding, ` +
-      `confirming that the aggregated weighted signal aligns with the individual ` +
-      `pattern-level findings across all four index dimensions.`
+      `The composite score aligns with the individual index flags, indicating that the ` +
+      `weighted summary is consistent with the underlying count-derived indices.`
     );
   }
   // Generic fallback
   return (
-    `These concurrent patterns indicate that the ecosystem exhibits biodiversity stress ` +
-    `across multiple measurable dimensions simultaneously, strengthening the overall ` +
-    `ecological interpretation beyond what any single index could establish alone.`
+    `These concurrent patterns indicate that multiple count-derived metrics are moving ` +
+    `in the same direction, strengthening the screening signal beyond any single index.`
   );
 }

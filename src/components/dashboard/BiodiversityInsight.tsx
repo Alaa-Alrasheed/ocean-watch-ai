@@ -1,8 +1,20 @@
 import { useMemo, type ReactNode } from "react";
-import { AlertTriangle } from "lucide-react";
-import { runRuleEngine, SAMPLE_ADEQUATE, SAMPLE_MARGINAL } from "@/lib/ruleEngine";
+import { AlertTriangle, Info, ListChecks, ShieldQuestion } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  LOW_TAXA_WARNING_THRESHOLD,
+  runRuleEngine,
+  SAMPLE_ADEQUATE,
+  SAMPLE_MARGINAL,
+} from "@/lib/ruleEngine";
 import type {
   CompositeStatus,
+  PatternFamily,
   ReportParagraph,
   SampleBand,
   Severity,
@@ -75,6 +87,21 @@ const severityStyle: Record<
     bg: "bg-destructive/5",
     label: "Critical Severity",
     labelColor: "text-destructive",
+  },
+};
+
+const sampleSizeCopy: Record<SampleBand, { label: string; description: string }> = {
+  ADEQUATE: {
+    label: "Adequate",
+    description: "no sample-size penalty applied",
+  },
+  MARGINAL: {
+    label: "Marginal",
+    description: "confidence is reduced because detections are below the recommended threshold",
+  },
+  INSUFFICIENT: {
+    label: "Insufficient",
+    description: "confidence is strongly reduced because detections are below the minimum threshold",
   },
 };
 
@@ -196,6 +223,30 @@ function QualityCaveat({ text }: { text: string }) {
   );
 }
 
+function ReportSection({
+  label,
+  title,
+  children,
+}: {
+  label: string;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-wide text-primary">
+          {label}
+        </span>
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+          {title}
+        </h3>
+      </div>
+      {children}
+    </section>
+  );
+}
+
 function ScientificUseDisclaimer() {
   return (
     <div className="flex gap-3 border-b border-border/40 bg-destructive/5 px-5 py-4">
@@ -206,9 +257,85 @@ function ScientificUseDisclaimer() {
         </p>
         <p className="text-xs leading-relaxed text-muted-foreground">
           Decision support only. Thresholds and pattern families are project heuristics,
-          not ground truth; validate against local baselines, survey design, CV error, and
-          expert review before use in conservation, fisheries, policy, or operations.
+          not ground truth; validate against replicate count datasets, species ID quality,
+          local baselines when available, and expert marine review before use in
+          conservation, fisheries, policy, or operations.
         </p>
+      </div>
+    </div>
+  );
+}
+
+function ConfidenceExplanation({
+  patterns,
+  sampleSize,
+  totalCount,
+}: {
+  patterns: PatternFamily[];
+  sampleSize: SampleBand;
+  totalCount: number;
+}) {
+  const confidenceValues = patterns.map((pattern) => pattern.confidence);
+  const minConfidence = confidenceValues.length > 0 ? Math.min(...confidenceValues) : 0;
+  const maxConfidence = confidenceValues.length > 0 ? Math.max(...confidenceValues) : 0;
+  const confidenceLabel =
+    patterns.length === 0
+      ? "No rule confidence shown"
+      : minConfidence === maxConfidence
+        ? `${maxConfidence}%`
+        : `${minConfidence}-${maxConfidence}%`;
+  const sample = sampleSizeCopy[sampleSize];
+
+  return (
+    <div className="flex gap-3 border-b border-border/40 bg-secondary/20 px-5 py-4">
+      <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+      <div className="space-y-1.5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+          Confidence basis
+        </p>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          Rule confidence is deterministic: it increases when more count-derived indices
+          agree and is adjusted by sample-size adequacy. Current confidence display:{" "}
+          <span className="font-mono text-foreground">{confidenceLabel}</span>; sample
+          size band: <span className="font-medium text-foreground">{sample.label}</span>{" "}
+          (n={totalCount}, {sample.description}). It is not a probability of ecological
+          truth.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function CountDataLimitations() {
+  const limitations = [
+    "cause of stress or dominance",
+    "habitat condition",
+    "seasonal or temporal trend",
+    "fishing pressure or pollution",
+    "regional baseline comparison",
+  ];
+
+  return (
+    <div className="flex gap-3 border-b border-border/40 bg-sand/5 px-5 py-4">
+      <ShieldQuestion className="mt-0.5 h-4 w-4 shrink-0 text-sand" aria-hidden="true" />
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-sand">
+          What count data cannot infer
+        </p>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          The current dataset supports biodiversity structure from species counts only.
+          It cannot independently determine:
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {limitations.map((item) => (
+            <span
+              key={item}
+              className="rounded-full bg-background/30 px-2 py-0.5 text-[11px] text-muted-foreground ring-1 ring-border/40"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -246,6 +373,31 @@ function DatasetSizeLimitation({
   );
 }
 
+function TaxonomicBreadthLimitation({ speciesCount }: { speciesCount: number }) {
+  if (speciesCount > LOW_TAXA_WARNING_THRESHOLD) {
+    return null;
+  }
+
+  return (
+    <div className="flex gap-3 border-b border-border/40 bg-red-500/5 px-5 py-4">
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" aria-hidden="true" />
+      <div className="space-y-1.5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-red-400">
+          Taxonomic breadth limitation
+        </p>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          S={speciesCount}: only {speciesCount}{" "}
+          {speciesCount === 1 ? "taxon was" : "taxa were"} detected. Even with an
+          adequate individual count, three or fewer detected taxa are too few for robust
+          biodiversity interpretation; treat diversity, evenness, and composite-score
+          outputs as low-richness screening results until sampling coverage and species
+          IDs are reviewed.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function BiodiversityInsight({
   speciesCounts,
   className = "",
@@ -266,6 +418,14 @@ export default function BiodiversityInsight({
   const allSpeciesNames = Object.keys(speciesCounts).filter((species) => speciesCounts[species] > 0);
   const status = compositeStyle[compositeStatus];
   const topSeverity = patterns.length > 0 ? patterns[0].severity : null;
+  const openingParagraph = paragraphs.find((paragraph) => paragraph.type === "opening");
+  const findingParagraphs = paragraphs.filter((paragraph) => paragraph.type === "finding");
+  const followUpParagraphs = paragraphs.filter(
+    (paragraph) =>
+      paragraph.type === "synthesis" ||
+      paragraph.type === "recommendation" ||
+      paragraph.type === "quality_caveat"
+  );
 
   return (
     <div className={`glass-card overflow-hidden rounded-xl ${className}`}>
@@ -297,55 +457,93 @@ export default function BiodiversityInsight({
         </div>
       </div>
 
-      <ScientificUseDisclaimer />
       <DatasetSizeLimitation sampleSize={bands.sampleSize} totalCount={indices.totalCount} />
+      <TaxonomicBreadthLimitation speciesCount={indices.S} />
+      <ConfidenceExplanation
+        patterns={patterns}
+        sampleSize={bands.sampleSize}
+        totalCount={indices.totalCount}
+      />
+      <CountDataLimitations />
 
-      <div className="space-y-3 px-5 py-4">
-        {paragraphs.map((paragraph: ReportParagraph, i: number) => {
-          switch (paragraph.type) {
-            case "opening":
-              return (
-                <OpeningParagraph
-                  key={i}
-                  text={paragraph.text}
-                  speciesNames={allSpeciesNames}
-                />
-              );
-            case "finding":
-              return (
+      <div className="space-y-5 px-5 py-4">
+        {openingParagraph && (
+          <ReportSection label="01" title="Main finding">
+            <OpeningParagraph
+              text={openingParagraph.text}
+              speciesNames={allSpeciesNames}
+            />
+          </ReportSection>
+        )}
+
+        <ReportSection label="02" title="Triggered rule families">
+          {findingParagraphs.length > 0 ? (
+            <div className="space-y-3">
+              {findingParagraphs.map((paragraph: ReportParagraph, i: number) => (
                 <FindingParagraph
                   key={i}
                   text={paragraph.text}
                   severity={paragraph.severity!}
                   speciesNames={allSpeciesNames}
                 />
-              );
-            case "synthesis":
-              return (
-                <SynthesisParagraph
-                  key={i}
-                  text={paragraph.text}
-                  speciesNames={allSpeciesNames}
-                />
-              );
-            case "recommendation":
-              return (
-                <RecommendationParagraph
-                  key={i}
-                  text={paragraph.text}
-                  speciesNames={allSpeciesNames}
-                />
-              );
-            case "quality_caveat":
-              return <QualityCaveat key={i} text={paragraph.text} />;
-            default:
-              return null;
-          }
-        })}
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              No pattern families fired for this species-count distribution.
+            </p>
+          )}
+        </ReportSection>
+
+        {followUpParagraphs.length > 0 && (
+          <ReportSection label="03" title="Recommended follow-up">
+            <div className="space-y-3">
+              {followUpParagraphs.map((paragraph: ReportParagraph, i: number) => {
+                switch (paragraph.type) {
+                  case "synthesis":
+                    return (
+                      <SynthesisParagraph
+                        key={i}
+                        text={paragraph.text}
+                        speciesNames={allSpeciesNames}
+                      />
+                    );
+                  case "recommendation":
+                    return (
+                      <RecommendationParagraph
+                        key={i}
+                        text={paragraph.text}
+                        speciesNames={allSpeciesNames}
+                      />
+                    );
+                  case "quality_caveat":
+                    return <QualityCaveat key={i} text={paragraph.text} />;
+                  default:
+                    return null;
+                }
+              })}
+            </div>
+          </ReportSection>
+        )}
+
+        <Accordion type="single" collapsible className="border-t border-border/40 pt-2">
+          <AccordionItem value="scientific-context" className="border-b-0">
+            <AccordionTrigger className="py-3 text-sm font-semibold hover:no-underline">
+              Scientific context &amp; limitations
+            </AccordionTrigger>
+            <AccordionContent className="pb-0">
+              <div className="overflow-hidden rounded-md border border-border/40">
+                <ScientificUseDisclaimer />
+                <CountDataLimitations />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
 
       <div className="flex flex-col gap-1 border-t border-border/40 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <ListChecks className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
           Generated by deterministic rule engine - {patterns.length}{" "}
           {patterns.length === 1 ? "pattern" : "patterns"} detected - {indices.S}{" "}
           species - {indices.totalCount} individuals

@@ -1,0 +1,15 @@
+{
+  "surveyName": "Stressed biodiversity fixture",
+  "expectedCompositeStatus": "STRESSED",
+  "totalFishCount": 200,
+  "species": [
+    { "speciesName": "Pomacanthus asfur", "speciesCount": 95 },
+    { "speciesName": "Rastrelliger kanagurta", "speciesCount": 35 },
+    { "speciesName": "Epinephelus fasciatus", "speciesCount": 25 },
+    { "speciesName": "Lates calcarifer", "speciesCount": 15 },
+    { "speciesName": "Scarus ghobban", "speciesCount": 10 },
+    { "speciesName": "Siganus canaliculatus", "speciesCount": 8 },
+    { "speciesName": "Lethrinus nebulosus", "speciesCount": 7 },
+    { "speciesName": "Lutjanus argentimaculatus", "speciesCount": 5 }
+  ]
+}

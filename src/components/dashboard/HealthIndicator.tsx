@@ -18,8 +18,18 @@ const progressColors = {
   stressed: "bg-red-500",
 };
 
+function formatIndexValue(value: number): string {
+  if (Number.isInteger(value)) {
+    return String(value);
+  }
+
+  return value.toFixed(2).replace(/\.?0+$/, "");
+}
+
 export function HealthIndicator({ index }: { index: BiodiversityIndex }) {
   const pct = Math.min((index.value / index.maxValue) * 100, 100);
+  const isAboveScale = index.value > index.maxValue;
+  const scaleLabel = index.scaleLabel ?? `0-${index.maxValue}`;
 
   return (
     <div className="glass-card rounded-xl p-5 space-y-3">
@@ -29,9 +39,11 @@ export function HealthIndicator({ index }: { index: BiodiversityIndex }) {
           {index.status}
         </span>
       </div>
-      <div className="flex items-end gap-2">
-        <span className="text-3xl font-bold tracking-tight text-foreground">{index.value}</span>
-        <span className="text-sm text-muted-foreground mb-1">/ {index.maxValue}</span>
+      <div className="flex flex-wrap items-end gap-x-2 gap-y-1">
+        <span className="break-all text-3xl font-bold tabular-nums tracking-tight text-foreground">
+          {formatIndexValue(index.value)}
+        </span>
+        <span className="mb-1 text-xs text-muted-foreground">{scaleLabel}</span>
       </div>
       <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
         <div
@@ -39,6 +51,11 @@ export function HealthIndicator({ index }: { index: BiodiversityIndex }) {
           style={{ width: `${pct}%` }}
         />
       </div>
+      {isAboveScale && (
+        <p className="text-[11px] font-medium uppercase tracking-wide text-primary">
+          Scoring cap reached; raw value retained
+        </p>
+      )}
       <p className="text-xs text-muted-foreground leading-relaxed">{index.description}</p>
     </div>
   );

@@ -1,14 +1,33 @@
+import { useMemo, useState } from "react";
 import { SurveyHeader } from "@/components/dashboard/SurveyHeader";
 import { HealthIndicator } from "@/components/dashboard/HealthIndicator";
 import { BiodiversityScore } from "@/components/dashboard/BiodiversityScore";
 import { SpeciesTable } from "@/components/dashboard/SpeciesTable";
 import { SpeciesChart } from "@/components/dashboard/SpeciesChart";
-import { TemporalChart } from "@/components/dashboard/TemporalChart";
+import { DatasetSummary } from "@/components/dashboard/DatasetSummary";
+import { AbundanceProfile } from "@/components/dashboard/AbundanceProfile";
 import BiodiversityInsight from "@/components/dashboard/BiodiversityInsight";
 import { DownloadReport } from "@/components/dashboard/DownloadReport";
-import { speciesData as baseSpeciesData } from "@/data/marineData";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import dummySpeciesCountsFixture from "@/data/dummySpeciesCounts.json";
-import { runRuleEngine } from "@/lib/ruleEngine";
+import healthySpeciesCountsFixture from "@/data/dummySpeciesCounts.healthy.json";
+import largeSpeciesCountsFixture from "@/data/dummySpeciesCounts.large.json";
+import largeDominanceSpeciesCountsFixture from "@/data/dummySpeciesCounts.largeDominance.json";
+import moderateSpeciesCountsFixture from "@/data/dummySpeciesCounts.moderate.json";
+import singleSpeciesCountsFixture from "@/data/dummySpeciesCounts.singleSpecies.json";
+import smallSpeciesCountsFixture from "@/data/dummySpeciesCounts.small.json";
+import stressedSpeciesCountsFixture from "@/data/dummySpeciesCounts.stressed.json";
+import {
+  RICHNESS_SCORE_CAP,
+  SHANNON_SCORE_CAP,
+  runRuleEngine,
+} from "@/lib/ruleEngine";
 import type {
   Bands,
   ComputedIndices,
@@ -17,59 +36,115 @@ import type {
 } from "@/lib/ruleEngine";
 import type {
   BiodiversityIndex as DashboardBiodiversityIndex,
-  DetectionEvent,
   FishSpecies,
 } from "@/data/marineData";
 
-const dashboardSpeciesCounts = dummySpeciesCountsFixture.species.reduce<SpeciesCounts>(
-  (counts, species) => {
-    counts[species.speciesName] = species.speciesCount;
-    return counts;
+interface SpeciesCountsFixture {
+  surveyName: string;
+  totalFishCount: number;
+  expectedCompositeStatus?: string;
+  species: Array<{
+    speciesName: string;
+    speciesCount: number;
+  }>;
+}
+
+interface TestFixtureOption {
+  label: string;
+  fileName: string;
+  note: string;
+  data: SpeciesCountsFixture;
+}
+
+const testFixtures: TestFixtureOption[] = [
+  {
+    label: "Active file",
+    fileName: "dummySpeciesCounts.json",
+    note: "Current dummySpeciesCounts.json",
+    data: dummySpeciesCountsFixture,
   },
-  {}
-);
-
-const computedFixtureTotal = Object.values(dashboardSpeciesCounts).reduce(
-  (sum, count) => sum + count,
-  0
-);
-
-const hasFixtureTotalMismatch =
-  computedFixtureTotal !== dummySpeciesCountsFixture.totalFishCount;
-
-const ruleEngineOutput = runRuleEngine(dashboardSpeciesCounts);
-const baseSpeciesByScientificName = new Map(
-  baseSpeciesData.map((species) => [species.scientificName, species])
-);
-
-const dashboardSpeciesData: FishSpecies[] = dummySpeciesCountsFixture.species.map(
-  (species, index) => {
-    const baseSpecies = baseSpeciesByScientificName.get(species.speciesName);
-    const percentage = computedFixtureTotal
-      ? Math.round((species.speciesCount / computedFixtureTotal) * 1000) / 10
-      : 0;
-
-    return {
-      id: baseSpecies?.id ?? String(index + 1),
-      name: baseSpecies?.name ?? species.speciesName,
-      scientificName: species.speciesName,
-      count: species.speciesCount,
-      percentage,
-      trend: baseSpecies?.trend ?? "stable",
-      category: baseSpecies?.category ?? "reef",
-    };
-  }
-);
-
-const dashboardTemporalData: DetectionEvent[] = [
-  { timestamp: "06:00", speciesCount: 2, totalIndividuals: 12, dominantSpecies: "Arabian Angelfish" },
-  { timestamp: "08:00", speciesCount: 3, totalIndividuals: 26, dominantSpecies: "Arabian Angelfish" },
-  { timestamp: "10:00", speciesCount: 4, totalIndividuals: 38, dominantSpecies: "Arabian Angelfish" },
-  { timestamp: "12:00", speciesCount: 5, totalIndividuals: 54, dominantSpecies: "Arabian Angelfish" },
-  { timestamp: "14:00", speciesCount: 5, totalIndividuals: 42, dominantSpecies: "Arabian Angelfish" },
-  { timestamp: "16:00", speciesCount: 4, totalIndividuals: 20, dominantSpecies: "Arabian Angelfish" },
-  { timestamp: "18:00", speciesCount: 3, totalIndividuals: 8, dominantSpecies: "Indian Mackerel" },
+  {
+    label: "Healthy",
+    fileName: "dummySpeciesCounts.healthy.json",
+    note: "Balanced 30-species sample",
+    data: healthySpeciesCountsFixture,
+  },
+  {
+    label: "Moderate",
+    fileName: "dummySpeciesCounts.moderate.json",
+    note: "Moderately healthy uneven sample",
+    data: moderateSpeciesCountsFixture,
+  },
+  {
+    label: "Stressed",
+    fileName: "dummySpeciesCounts.stressed.json",
+    note: "Stressed low-richness sample",
+    data: stressedSpeciesCountsFixture,
+  },
+  {
+    label: "Small dataset",
+    fileName: "dummySpeciesCounts.small.json",
+    note: "Insufficient sample-size warning",
+    data: smallSpeciesCountsFixture,
+  },
+  {
+    label: "Large dataset",
+    fileName: "dummySpeciesCounts.large.json",
+    note: "Large balanced 60-species sample",
+    data: largeSpeciesCountsFixture,
+  },
+  {
+    label: "Large dominance",
+    fileName: "dummySpeciesCounts.largeDominance.json",
+    note: "Large sample with bad distribution",
+    data: largeDominanceSpeciesCountsFixture,
+  },
+  {
+    label: "Single species",
+    fileName: "dummySpeciesCounts.singleSpecies.json",
+    note: "Single-taxon edge case",
+    data: singleSpeciesCountsFixture,
+  },
 ];
+
+function toSpeciesCounts(fixture: SpeciesCountsFixture): SpeciesCounts {
+  return fixture.species.reduce<SpeciesCounts>((counts, species) => {
+    const count = Number(species.speciesCount);
+
+    if (species.speciesName && Number.isFinite(count) && count > 0) {
+      counts[species.speciesName] = count;
+    }
+
+    return counts;
+  }, {});
+}
+
+function toDashboardSpeciesData(
+  fixture: SpeciesCountsFixture,
+  totalCount: number
+): FishSpecies[] {
+  return fixture.species
+    .filter((species) => {
+      const count = Number(species.speciesCount);
+      return species.speciesName && Number.isFinite(count) && count > 0;
+    })
+    .sort((a, b) => b.speciesCount - a.speciesCount)
+    .map((species, index) => {
+      const percentage = totalCount
+        ? Math.round((species.speciesCount / totalCount) * 1000) / 10
+        : 0;
+
+      return {
+        id: String(index + 1),
+        name: species.speciesName,
+        scientificName: species.speciesName,
+        count: species.speciesCount,
+        percentage,
+        trend: "stable",
+        category: "reef",
+      };
+    });
+}
 
 function bandStatus(
   band: Bands["richness"] | Bands["shannon"] | Bands["simpson"] | Bands["evenness"]
@@ -93,43 +168,72 @@ function buildDashboardIndices(
     {
       name: "Species Richness",
       value: indices.S,
-      maxValue: 50,
-      description: "Total number of distinct species detected in the survey area",
+      maxValue: RICHNESS_SCORE_CAP,
+      scaleLabel: `score cap S >= ${RICHNESS_SCORE_CAP}`,
+      description: "Distinct taxa detected; composite contribution is capped after the threshold",
       status: bandStatus(bands.richness),
     },
     {
       name: "Shannon Index (H')",
       value: indices.H,
-      maxValue: 4,
-      description: "Species diversity combining richness and evenness",
+      maxValue: SHANNON_SCORE_CAP,
+      scaleLabel: `score cap H' >= ${SHANNON_SCORE_CAP}`,
+      description: "Richness-evenness diversity; raw H' can exceed the scoring cap",
       status: bandStatus(bands.shannon),
     },
     {
       name: "Simpson Index (1-D)",
       value: indices.D,
       maxValue: 1,
-      description: "Probability two random individuals are different species",
+      scaleLabel: "0-1 range",
+      description: "Gini-Simpson diversity: probability two individuals differ",
       status: bandStatus(bands.simpson),
     },
     {
       name: "Pielou Evenness (J')",
       value: indices.J,
       maxValue: 1,
-      description: "How equally species are distributed",
+      scaleLabel: "0-1 range",
+      description: "Evenness normalized to the observed richness",
       status: bandStatus(bands.evenness),
     },
   ];
 }
 
-const dashboardIndices = ruleEngineOutput
-  ? buildDashboardIndices(ruleEngineOutput.indices, ruleEngineOutput.bands)
-  : [];
-
-const dashboardCompositeScore = ruleEngineOutput?.indices.compositeScore ?? 0;
-const dashboardCompositeStatus: CompositeStatus =
-  ruleEngineOutput?.compositeStatus ?? "CRITICAL";
-
 const Dashboard = () => {
+  const [fixtureIndex, setFixtureIndex] = useState(0);
+  const selectedFixture = testFixtures[fixtureIndex];
+  const activeDataset = selectedFixture.data;
+
+  const dashboardSpeciesCounts = useMemo(
+    () => toSpeciesCounts(activeDataset),
+    [activeDataset]
+  );
+  const computedFixtureTotal = useMemo(
+    () =>
+      Object.values(dashboardSpeciesCounts).reduce(
+        (sum, count) => sum + count,
+        0
+      ),
+    [dashboardSpeciesCounts]
+  );
+  const hasFixtureTotalMismatch =
+    computedFixtureTotal !== activeDataset.totalFishCount;
+  const ruleEngineOutput = useMemo(
+    () => runRuleEngine(dashboardSpeciesCounts),
+    [dashboardSpeciesCounts]
+  );
+  const dashboardSpeciesData = useMemo(
+    () => toDashboardSpeciesData(activeDataset, computedFixtureTotal),
+    [activeDataset, computedFixtureTotal]
+  );
+  const dashboardIndices = ruleEngineOutput
+    ? buildDashboardIndices(ruleEngineOutput.indices, ruleEngineOutput.bands)
+    : [];
+  const dashboardCompositeScore = ruleEngineOutput?.indices.compositeScore ?? 0;
+  const dashboardCompositeStatus: CompositeStatus =
+    ruleEngineOutput?.compositeStatus ?? "CRITICAL";
+
   return (
     <div className="min-h-screen gradient-ocean pt-20">
       <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
@@ -138,6 +242,55 @@ const Dashboard = () => {
           totalIndividuals={ruleEngineOutput?.indices.totalCount}
           ecosystemStatus={dashboardCompositeStatus}
         />
+
+        <section className="glass-card rounded-xl p-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-sand">
+                Temporary test JSON selector
+              </p>
+              <h2 className="mt-1 text-base font-semibold text-foreground">
+                {selectedFixture.label}
+              </h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {selectedFixture.note}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span className="font-mono text-foreground/80">
+                  {selectedFixture.fileName}
+                </span>
+                <span>{activeDataset.surveyName}</span>
+              </div>
+            </div>
+
+            <div className="w-full md:w-80">
+              <label
+                htmlFor="fixture-select"
+                className="mb-1.5 block text-xs font-medium text-muted-foreground"
+              >
+                Display dataset
+              </label>
+              <Select
+                value={String(fixtureIndex)}
+                onValueChange={(value) => setFixtureIndex(Number(value))}
+              >
+                <SelectTrigger
+                  id="fixture-select"
+                  className="border-border/60 bg-background/70"
+                >
+                  <SelectValue placeholder="Choose test JSON" />
+                </SelectTrigger>
+                <SelectContent>
+                  {testFixtures.map((fixture, index) => (
+                    <SelectItem key={fixture.fileName} value={String(index)}>
+                      {fixture.label} - {fixture.fileName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </section>
 
         <section>
           <h2 className="mb-4 text-lg font-semibold">Biodiversity Indices</h2>
@@ -152,9 +305,18 @@ const Dashboard = () => {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {ruleEngineOutput && (
+          <DatasetSummary
+            species={dashboardSpeciesData}
+            indices={ruleEngineOutput.indices}
+            sampleSize={ruleEngineOutput.bands.sampleSize}
+            patternCount={ruleEngineOutput.patterns.length}
+          />
+        )}
+
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
           <SpeciesChart species={dashboardSpeciesData} />
-          <TemporalChart data={dashboardTemporalData} />
+          <AbundanceProfile species={dashboardSpeciesData} />
         </section>
 
         <section>
@@ -165,7 +327,7 @@ const Dashboard = () => {
           <BiodiversityInsight speciesCounts={dashboardSpeciesCounts} />
           {hasFixtureTotalMismatch && (
             <p className="mt-2 text-xs text-destructive">
-              Dummy fixture total mismatch: declared {dummySpeciesCountsFixture.totalFishCount},
+              Dummy fixture total mismatch: declared {activeDataset.totalFishCount},
               computed {computedFixtureTotal}.
             </p>
           )}
@@ -176,8 +338,8 @@ const Dashboard = () => {
         </section>
 
         <footer className="border-t border-border/30 py-6 text-center text-xs text-muted-foreground">
-          Marine Biodiversity Analysis Framework - Fujairah, UAE - Powered by Deep Learning
-          & Deterministic Rule Interpretation
+          Marine Biodiversity Count Analysis Framework - Count-derived indices
+          & deterministic rule interpretation
         </footer>
       </div>
     </div>
