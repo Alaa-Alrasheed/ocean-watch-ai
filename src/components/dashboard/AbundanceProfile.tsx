@@ -1,4 +1,4 @@
-import { BarChart3, Percent } from "lucide-react";
+import { Percent } from "lucide-react";
 import type { FishSpecies } from "@/data/marineData";
 
 interface AbundanceProfileProps {
@@ -13,23 +13,23 @@ function dominanceBand(percentage: number): {
   if (percentage >= 65) {
     return {
       label: "High dominance",
-      color: "text-red-400",
-      fill: "bg-red-500",
+      color: "text-coral-soft",
+      fill: "bg-coral-soft",
     };
   }
 
   if (percentage >= 40) {
     return {
       label: "Elevated dominance",
-      color: "text-orange-400",
-      fill: "bg-orange-400",
+      color: "text-sand",
+      fill: "bg-sand",
     };
   }
 
   return {
     label: "No single-species dominance",
-    color: "text-emerald-400",
-    fill: "bg-emerald-400",
+    color: "text-bioluminescent",
+    fill: "bg-bioluminescent",
   };
 }
 
@@ -40,19 +40,16 @@ export function AbundanceProfile({ species }: AbundanceProfileProps) {
   const shouldScroll = sortedSpecies.length > 6;
 
   return (
-    <div className="glass-card rounded-xl p-5">
+    <div className="panel p-5">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="mb-1 flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-primary" aria-hidden="true" />
-            <h2 className="text-lg font-semibold">Species Abundance Records</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Complete ranked count list with each species' proportional share.
+          <h2 className="font-display text-2xl">Abundance</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Every species, ranked by count, with its share of the total.
           </p>
         </div>
 
-        <span className={`inline-flex items-center gap-1.5 rounded-full bg-secondary/40 px-2.5 py-1 text-xs font-semibold ring-1 ring-border/50 ${band.color}`}>
+        <span className={`inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold ring-1 ring-border ${band.color}`}>
           <Percent className="h-3.5 w-3.5" aria-hidden="true" />
           {band.label}
         </span>

@@ -206,7 +206,7 @@ function RecommendationParagraph({
   speciesNames: string[];
 }) {
   return (
-    <div className="rounded-r-md border-l-2 border-l-accent bg-accent/5 px-4 py-3">
+    <div className="rounded-r-md border-l-2 border-l-primary bg-primary/5 px-4 py-3">
       <p className="text-sm leading-relaxed text-muted-foreground">
         {renderWithItalics(text, speciesNames)}
       </p>
@@ -320,10 +320,10 @@ function DatasetSizeLimitation({
   const isInsufficient = sampleSize === "INSUFFICIENT";
 
   return (
-    <div className="flex gap-3 border-b border-border/40 bg-red-500/5 px-5 py-4">
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" aria-hidden="true" />
+    <div className="flex gap-3 border-b border-border/40 bg-destructive/5 px-5 py-4">
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
       <div className="space-y-1.5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-red-400">
+        <p className="text-xs font-semibold uppercase tracking-wide text-destructive">
           Dataset size limitation
         </p>
         <p className="text-xs leading-relaxed text-muted-foreground">
@@ -344,10 +344,10 @@ function TaxonomicBreadthLimitation({ speciesCount }: { speciesCount: number }) 
   }
 
   return (
-    <div className="flex gap-3 border-b border-border/40 bg-red-500/5 px-5 py-4">
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" aria-hidden="true" />
+    <div className="flex gap-3 border-b border-border/40 bg-destructive/5 px-5 py-4">
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
       <div className="space-y-1.5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-red-400">
+        <p className="text-xs font-semibold uppercase tracking-wide text-destructive">
           Taxonomic breadth limitation
         </p>
         <p className="text-xs leading-relaxed text-muted-foreground">
@@ -371,7 +371,7 @@ export default function BiodiversityInsight({
 
   if (!output) {
     return (
-      <div className={`glass-card rounded-xl border-dashed px-6 py-8 text-center ${className}`}>
+      <div className={`panel border-dashed px-6 py-8 text-center ${className}`}>
         <p className="text-sm text-muted-foreground">
           No species data available. Upload a dataset to generate an ecological assessment.
         </p>
@@ -393,12 +393,12 @@ export default function BiodiversityInsight({
   );
 
   return (
-    <div className={`glass-card overflow-hidden rounded-xl ${className}`}>
+    <div className={`panel overflow-hidden ${className}`}>
       <div
         className={`flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between ${status.headerBorder} ${status.headerBg}`}
       >
         <div>
-          <h2 className="text-lg font-semibold">Ecological Insight Report</h2>
+          <h2 className="font-display text-2xl">Ecological insight</h2>
           <p className="mt-1 text-xs text-muted-foreground">
             Deterministic rule-engine output from species counts
           </p>

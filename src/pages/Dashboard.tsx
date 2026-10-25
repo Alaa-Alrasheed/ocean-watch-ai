@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { SurveyHeader } from "@/components/dashboard/SurveyHeader";
 import { HealthIndicator } from "@/components/dashboard/HealthIndicator";
 import { BiodiversityScore } from "@/components/dashboard/BiodiversityScore";
@@ -199,9 +201,41 @@ function buildDashboardIndices(
   ];
 }
 
+/** Finished pipeline runs, newest first, in the fixture shape the dashboard reads.
+ * Counts are MaxN per species (species-level verdicts only). */
+async function loadAnalysedVideos(): Promise<TestFixtureOption[]> {
+  const { data } = await supabase
+    .from("runs")
+    .select("id, finished_at, datasets(name, capture_date), species_counts(species, maxn)")
+    .eq("status", "done")
+    .order("finished_at", { ascending: false });
+  return (data ?? []).map((r) => {
+    const ds = r.datasets as unknown as { name: string; capture_date: string | null } | null;
+    const counts = (r.species_counts ?? []) as { species: string; maxn: number }[];
+    return {
+      label: ds?.name ?? "Video",
+      fileName: ds?.capture_date ?? "",
+      note: "Analysed by the BioReef pipeline (MaxN per species)",
+      data: {
+        surveyName: ds?.name ?? "Video",
+        totalFishCount: counts.reduce((s, c) => s + c.maxn, 0),
+        species: counts.map((c) => ({ speciesName: c.species, speciesCount: c.maxn })),
+      },
+    };
+  });
+}
+
 const Dashboard = () => {
+  const { user } = useAuth();
+  const [analysed, setAnalysed] = useState<TestFixtureOption[]>([]);
+  useEffect(() => {
+    if (!user) return;
+    loadAnalysedVideos().then(setAnalysed);
+  }, [user]);
+  const options = useMemo(() => [...analysed, ...testFixtures], [analysed]);
+
   const [fixtureIndex, setFixtureIndex] = useState(0);
-  const selectedFixture = testFixtures[fixtureIndex];
+  const selectedFixture = options[Math.min(fixtureIndex, options.length - 1)];
   const activeDataset = selectedFixture.data;
 
   const dashboardSpeciesCounts = useMemo(
@@ -234,65 +268,38 @@ const Dashboard = () => {
     ruleEngineOutput?.compositeStatus ?? "CRITICAL";
 
   return (
-    <div className="min-h-screen gradient-ocean pt-20">
-      <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-16">
+      {/* survey picker: sticks under the navbar while the page scrolls */}
+      <div className="sticky top-16 z-30 border-b border-border/60 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+          <div className="hidden min-w-0 md:block">
+            <p className="truncate text-sm text-foreground">{selectedFixture.label}</p>
+            <p className="truncate text-xs text-muted-foreground">{selectedFixture.note}</p>
+          </div>
+          <Select value={String(fixtureIndex)} onValueChange={(value) => setFixtureIndex(Number(value))}>
+            <SelectTrigger id="fixture-select" aria-label="Survey" className="h-9 w-full border-border bg-secondary md:w-80">
+              <SelectValue placeholder="Choose a survey" />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((fixture, index) => (
+                <SelectItem key={`${fixture.label}-${index}`} value={String(index)}>
+                  {fixture.label}{fixture.fileName ? ` · ${fixture.fileName}` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="stagger mx-auto max-w-7xl space-y-10 px-4 py-10 sm:px-6 lg:px-8">
         <SurveyHeader
           totalSpecies={ruleEngineOutput?.indices.S}
           totalIndividuals={ruleEngineOutput?.indices.totalCount}
           ecosystemStatus={dashboardCompositeStatus}
         />
 
-        <section className="glass-card rounded-xl p-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-wide text-sand">
-                Temporary test JSON selector
-              </p>
-              <h2 className="mt-1 text-base font-semibold text-foreground">
-                {selectedFixture.label}
-              </h2>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {selectedFixture.note}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                <span className="font-mono text-foreground/80">
-                  {selectedFixture.fileName}
-                </span>
-                <span>{activeDataset.surveyName}</span>
-              </div>
-            </div>
-
-            <div className="w-full md:w-80">
-              <label
-                htmlFor="fixture-select"
-                className="mb-1.5 block text-xs font-medium text-muted-foreground"
-              >
-                Display dataset
-              </label>
-              <Select
-                value={String(fixtureIndex)}
-                onValueChange={(value) => setFixtureIndex(Number(value))}
-              >
-                <SelectTrigger
-                  id="fixture-select"
-                  className="border-border/60 bg-background/70"
-                >
-                  <SelectValue placeholder="Choose test JSON" />
-                </SelectTrigger>
-                <SelectContent>
-                  {testFixtures.map((fixture, index) => (
-                    <SelectItem key={fixture.fileName} value={String(index)}>
-                      {fixture.label} - {fixture.fileName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </section>
-
         <section>
-          <h2 className="mb-4 text-lg font-semibold">Biodiversity Indices</h2>
+          <h2 className="mb-4 font-display text-3xl">Biodiversity indices</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {dashboardIndices.map((idx) => (
               <HealthIndicator key={idx.name} index={idx} />
@@ -336,9 +343,8 @@ const Dashboard = () => {
           />
         </section>
 
-        <footer className="border-t border-border/30 py-6 text-center text-xs text-muted-foreground">
-          Marine Biodiversity Count Analysis Framework - Count-derived indices
-          & deterministic rule interpretation
+        <footer className="border-t border-border/60 py-6 text-xs text-muted-foreground">
+          Indices are computed from the species counts. The written interpretation comes from a fixed rule set, not a language model.
         </footer>
       </div>
     </div>

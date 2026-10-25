@@ -153,11 +153,11 @@ export function DownloadReport({ surveyName, species, output }: DownloadReportPr
   };
 
   return (
-    <div className="glass-card flex flex-col gap-4 rounded-xl p-5 sm:flex-row sm:items-center sm:justify-between">
+    <div className="panel flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h3 className="font-semibold">Download Full Report</h3>
+        <h3 className="font-display text-2xl">Report</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Export the active dataset, calculated indices, rule findings, and ranked counts as PDF.
+          The selected survey's indices, rule findings and ranked counts, as a PDF.
         </p>
       </div>
       <Button onClick={handleDownload} disabled={!output || isExporting} className="gap-2">

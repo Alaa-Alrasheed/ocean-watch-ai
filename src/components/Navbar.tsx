@@ -43,66 +43,63 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-t-0 border-x-0 rounded-none">
-      <div className="container mx-auto flex items-center justify-between h-16 px-4">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center teal-glow">
-            <Fish className="w-5 h-5 text-primary" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight">
-            <span className="text-gradient-ocean">BioReef</span>
-            <span className="text-muted-foreground text-sm ml-1 font-mono">.ai</span>
-          </span>
+    <nav className="fixed left-0 right-0 top-0 z-50 border-b border-border/60 bg-background/75 backdrop-blur-md">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <Link to="/" className="flex items-center gap-2 text-foreground">
+          <Fish className="h-5 w-5 text-primary" />
+          <span className="font-display text-xl">BioReef</span>
+          <span className="-ml-1 font-mono text-xs text-muted-foreground">.ai</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-1">
-          {links.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-                location.pathname === l.to
-                  ? "text-primary bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              }`}
-            >
-              {l.label}
-            </Link>
-          ))}
+        <div className="hidden items-center gap-1 md:flex">
+          {links.map((l) => {
+            const active = location.pathname === l.to;
+            return (
+              <Link
+                key={l.to}
+                to={l.to}
+                aria-current={active ? "page" : undefined}
+                className={`relative px-4 py-2 text-sm transition-colors ${
+                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {l.label}
+                {active && <span className="absolute inset-x-4 -bottom-[13px] h-px bg-primary" />}
+              </Link>
+            );
+          })}
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden items-center gap-3 md:flex">
           {loading ? (
-            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           ) : user ? (
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen((o) => !o)}
-                className="flex items-center gap-2 pr-2 pl-1 py-1 rounded-full hover:bg-muted/40 transition-colors focus:outline-none focus:ring-1 focus:ring-primary"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-secondary text-xs font-semibold text-foreground transition-colors hover:bg-accent focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 aria-label="Open profile menu"
               >
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
-                  {initials}
-                </div>
+                {initials}
               </button>
               {menuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-muted/30 backdrop-blur-md border border-border/50 rounded-md overflow-hidden shadow-lg z-50">
-                  <div className="px-3 py-2 border-b border-border/30">
+                <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-border bg-popover shadow-lg">
+                  <div className="border-b border-border px-3 py-2">
                     <div className="text-xs text-muted-foreground">Signed in as</div>
-                    <div className="text-sm text-foreground truncate">{user.email}</div>
+                    <div className="truncate text-sm text-foreground">{user.email}</div>
                   </div>
                   <Link
                     to="/profile"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
                   >
-                    <UserIcon className="w-4 h-4" /> Profile
+                    <UserIcon className="h-4 w-4" /> Profile
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                   >
-                    <LogOut className="w-4 h-4" /> Sign out
+                    <LogOut className="h-4 w-4" /> Sign out
                   </button>
                 </div>
               )}
@@ -115,35 +112,35 @@ const Navbar = () => {
                 </Button>
               </Link>
               <Link to="/signup">
-                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Sign up
-                </Button>
+                <Button size="sm">Sign up</Button>
               </Link>
             </>
           )}
         </div>
 
-        <button className="md:hidden text-foreground" onClick={() => setOpen(!open)}>
-          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        <button className="text-foreground md:hidden" onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"}>
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
       {open && (
-        <div className="md:hidden glass-card border-t border-border/50 p-4 space-y-2">
+        <div className="space-y-2 border-t border-border/60 p-4 md:hidden">
           {links.map((l) => (
             <Link
               key={l.to}
               to={l.to}
               onClick={() => setOpen(false)}
-              className="block px-4 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              className={`block rounded-md px-4 py-2 text-sm hover:bg-accent ${
+                location.pathname === l.to ? "text-foreground" : "text-muted-foreground"
+              }`}
             >
               {l.label}
             </Link>
           ))}
-          <div className={links.length > 0 ? "pt-2 border-t border-border/50" : ""}>
+          <div className={links.length > 0 ? "border-t border-border/60 pt-2" : ""}>
             {loading ? (
               <div className="flex justify-center py-2">
-                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               </div>
             ) : user ? (
               <div className="space-y-2">
@@ -152,7 +149,7 @@ const Navbar = () => {
                 </div>
                 <Link to="/profile" onClick={() => setOpen(false)} className="block">
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
-                    <UserIcon className="w-4 h-4" /> Profile
+                    <UserIcon className="h-4 w-4" /> Profile
                   </Button>
                 </Link>
                 <Button
@@ -162,9 +159,9 @@ const Navbar = () => {
                     setOpen(false);
                     handleSignOut();
                   }}
-                  className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  className="w-full justify-start gap-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <LogOut className="w-4 h-4" /> Sign out
+                  <LogOut className="h-4 w-4" /> Sign out
                 </Button>
               </div>
             ) : (
@@ -173,7 +170,7 @@ const Navbar = () => {
                   <Button variant="ghost" size="sm" className="w-full">Log in</Button>
                 </Link>
                 <Link to="/signup" className="flex-1" onClick={() => setOpen(false)}>
-                  <Button size="sm" className="w-full bg-primary text-primary-foreground">Sign up</Button>
+                  <Button size="sm" className="w-full">Sign up</Button>
                 </Link>
               </div>
             )}

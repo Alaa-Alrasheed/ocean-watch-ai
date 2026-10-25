@@ -1,5 +1,6 @@
-import { Database, Waves } from "lucide-react";
 import type { CompositeStatus } from "@/lib/ruleEngine";
+import { PageHeader } from "@/components/PageHeader";
+import { useTween } from "@/hooks/use-tween";
 
 interface SurveyHeaderProps {
   totalSpecies?: number;
@@ -9,7 +10,7 @@ interface SurveyHeaderProps {
 
 const statusDisplay: Record<CompositeStatus, { label: string; color: string }> = {
   HEALTHY: { label: "Healthy", color: "text-bioluminescent" },
-  MODERATELY_HEALTHY: { label: "Moderately Healthy", color: "text-sand" },
+  MODERATELY_HEALTHY: { label: "Moderately healthy", color: "text-sand" },
   STRESSED: { label: "Stressed", color: "text-coral-soft" },
   CRITICAL: { label: "Critical", color: "text-destructive" },
 };
@@ -20,46 +21,28 @@ export function SurveyHeader({
   ecosystemStatus = "MODERATELY_HEALTHY",
 }: SurveyHeaderProps) {
   const status = statusDisplay[ecosystemStatus];
+  const species = useTween(totalSpecies);
+  const individuals = useTween(totalIndividuals);
 
   return (
-    <header className="space-y-6">
-      <div>
-        <div className="flex items-center gap-2 text-primary font-mono text-sm mb-2 animate-pulse-slow">
-          <Waves className="w-4 h-4" />
-          <span>MARINE BIODIVERSITY MONITOR</span>
-        </div>
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight glow-text">
-          Biodiversity Count Analysis
-        </h1>
-        <p className="text-muted-foreground mt-2 max-w-2xl">
-          Species-count input, biodiversity indices, composite score, and rule-based
-          ecological flags.
-        </p>
-      </div>
+    <header className="space-y-8">
+      <PageHeader eyebrow="Dashboard" title="Biodiversity count analysis">
+        Indices, a composite score and rule-based flags, computed from species names and counts only.
+        No site, date, method or baseline data goes in.
+      </PageHeader>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="glass-card rounded-lg px-3.5 py-2 flex items-center gap-2 text-sm">
-          <Database className="w-3.5 h-3.5 text-primary shrink-0" />
-          <span className="text-muted-foreground">Input basis:</span>
-          <span className="font-medium text-foreground">species names + counts</span>
-        </div>
-        <div className="glass-card rounded-lg px-3.5 py-2 text-sm text-muted-foreground">
-          No site, time, method, habitat, or baseline metadata supplied
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <dl className="panel grid grid-cols-1 divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {[
-          { label: "Species Detected", value: totalSpecies, color: "text-primary" },
-          { label: "Total Individuals", value: totalIndividuals, color: "text-foreground" },
-          { label: "Ecosystem Status", value: status.label, color: status.color },
+          { label: "Species detected", value: Math.round(species), color: "text-foreground" },
+          { label: "Total individuals", value: Math.round(individuals), color: "text-foreground" },
+          { label: "Ecosystem status", value: status.label, color: status.color },
         ].map((m) => (
-          <div key={m.label} className="glass-card rounded-xl p-4 text-center">
-            <p className={`text-2xl md:text-3xl font-bold ${m.color}`}>{m.value}</p>
-            <p className="text-xs text-muted-foreground mt-1">{m.label}</p>
+          <div key={m.label} className="px-6 py-5">
+            <dt className="eyebrow">{m.label}</dt>
+            <dd className={`mt-2 font-display text-4xl tabular-nums ${m.color}`}>{m.value}</dd>
           </div>
         ))}
-      </div>
+      </dl>
     </header>
   );
 }

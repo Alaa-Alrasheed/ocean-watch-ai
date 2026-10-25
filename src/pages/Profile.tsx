@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Loader2, LogOut } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/PageHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/hooks/use-toast";
@@ -81,29 +82,21 @@ const ProfilePage = () => {
   ];
 
   return (
-    <div className="min-h-screen pt-20 px-4">
-      <div className="max-w-2xl mx-auto py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <User className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Profile</h1>
-            <p className="text-sm text-muted-foreground">Your BioReef.ai account</p>
-          </div>
-        </div>
+    <div className="min-h-screen px-4 pt-16">
+      <div className="stagger mx-auto max-w-2xl space-y-8 py-10">
+        <PageHeader title="Profile" />
 
-        <div className="glass-card rounded-xl p-6 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+        <div className="panel space-y-6 p-6">
+          <dl className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
             {fields.map((f) => (
               <div key={f.label}>
-                <div className="text-xs text-muted-foreground mb-1">{f.label}</div>
-                <div className="text-sm text-foreground">{f.value}</div>
+                <dt className="eyebrow mb-1">{f.label}</dt>
+                <dd className="text-sm text-foreground">{f.value}</dd>
               </div>
             ))}
-          </div>
+          </dl>
 
-          <div className="pt-4 border-t border-border/30">
+          <div className="border-t border-border pt-4">
             <Button
               type="button"
               variant="ghost"

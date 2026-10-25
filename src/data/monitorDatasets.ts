@@ -28,6 +28,18 @@ export interface Dataset {
   depth: string;
   frames: DatasetFrame[];
   videoUrl?: string;
+  run?: RunInfo;
+}
+
+/** Latest pipeline run for an uploaded video (public.runs). */
+export interface RunInfo {
+  id: string;
+  status: "pending" | "processing" | "done" | "failed";
+  progress: number;
+  error: string | null;
+  annotatedUrl?: string;
+  fishTracked: number | null;
+  richness: number | null;
 }
 
 export const sampleDatasets: Dataset[] = [

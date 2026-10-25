@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Fish, ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -103,14 +103,11 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-8">
-        <div className="text-center">
-          <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-4 teal-glow">
-            <Fish className="w-6 h-6 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold">Create account</h1>
-          <p className="text-sm text-muted-foreground mt-1">Join BioReef.ai</p>
+    <div className="flex min-h-screen items-center justify-center px-4 pb-10 pt-24">
+      <div className="stagger w-full max-w-sm space-y-8">
+        <div>
+          <h1 className="font-display text-4xl">Create an account</h1>
+          <p className="mt-2 text-sm text-muted-foreground">You need one to upload footage and keep the results.</p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -146,7 +143,7 @@ const Signup = () => {
                   />
                 </button>
                 {genderOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-muted/30 backdrop-blur-md border border-border/50 rounded-md overflow-hidden shadow-lg">
+                  <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover shadow-lg">
                     {GENDER_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}
@@ -155,10 +152,8 @@ const Signup = () => {
                           setGender(opt.value);
                           setGenderOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-2 text-sm transition-colors ${
-                          opt.value === gender
-                            ? "bg-primary/20 text-primary"
-                            : "text-foreground hover:bg-primary/10 hover:text-primary"
+                        className={`w-full px-3 py-2 text-left text-sm transition-colors ${
+                          opt.value === gender ? "bg-accent text-foreground" : "text-foreground hover:bg-accent"
                         }`}
                       >
                         {opt.label}
@@ -318,12 +313,12 @@ const Signup = () => {
               </Dialog>
             </span>
           </label>
-          <Button type="submit" disabled={submitting} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button type="submit" disabled={submitting} className="w-full">
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign up"}
           </Button>
         </form>
 
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link to="/login" className="text-primary hover:underline">Log in</Link>
         </p>

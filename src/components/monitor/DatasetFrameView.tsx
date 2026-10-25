@@ -63,9 +63,9 @@ const DatasetFrameView = ({
   };
 
   return (
-    <div className="glass-card rounded-xl">
+    <div className="panel">
       {/* Frame / Video area */}
-      <div className="relative bg-ocean-deep aspect-video overflow-hidden rounded-t-xl">
+      <div className="relative aspect-video overflow-hidden rounded-t-[calc(var(--radius)-1px)] bg-ocean-deep">
         {videoUrl ? (
           <video
             ref={videoRef}
@@ -119,11 +119,12 @@ const DatasetFrameView = ({
       </div>
 
       {/* Controls */}
-      <div className="px-4 py-3 border-t border-border/30 flex items-center gap-3">
+      <div className="flex items-center gap-3 border-t border-border px-4 py-3">
         {/* Play/Pause */}
         <button
           onClick={onPlayPause}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
+          aria-label={isPlaying ? "Pause" : "Play"}
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background transition-colors hover:bg-foreground/90"
         >
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
         </button>
@@ -161,13 +162,13 @@ const DatasetFrameView = ({
         <div className="relative">
           <button
             onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-            className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded bg-secondary/30"
+            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             {playbackSpeed}x
             <ChevronDown className="w-3 h-3" />
           </button>
           {showSpeedMenu && (
-            <div className="absolute bottom-full mb-1 right-0 bg-background border border-border/50 rounded-lg shadow-lg overflow-hidden z-20">
+            <div className="absolute bottom-full right-0 z-20 mb-1 overflow-hidden rounded-md border border-border bg-popover shadow-lg">
               {SPEEDS.map((s) => (
                 <button
                   key={s}
