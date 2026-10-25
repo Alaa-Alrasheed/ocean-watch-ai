@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Fish, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, Download, Fish, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import OceanCanvas, { type SceneStats } from "@/components/landing/OceanCanvas";
@@ -211,11 +211,19 @@ const Index = () => {
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
           Upload it and get back species counts, MaxN and diversity indices for the whole video.
         </p>
-        <Link to={ctaTo} className="mt-10 inline-block">
-          <Button size="lg" className="h-12 gap-2 px-7 text-base">
-            {ctaLabel} <ArrowRight className="h-4 w-4" />
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Link to={ctaTo}>
+            <Button size="lg" className="h-12 gap-2 px-7 text-base">
+              {ctaLabel} <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Button asChild size="lg" variant="outline" className="h-12 gap-2 px-7 text-base">
+            <a href="/bioreef-sample.mp4" download>
+              <Download className="h-4 w-4" /> Sample video (45 s, 15 MB)
+            </a>
           </Button>
-        </Link>
+        </div>
+        <p className="mt-4 text-xs text-muted-foreground">No footage? Download the sample, then upload it. Sample from the OzFish dataset (AIMS, CC BY 3.0 AU).</p>
       </Scene>
 
       <footer className="border-t border-border/50 px-6 py-10 md:px-10">

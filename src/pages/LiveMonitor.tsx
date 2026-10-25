@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Calendar, Clock, Upload as UploadIcon, Loader2, CheckCircle2, Trash2 } from "lucide-react";
+import { Calendar, Clock, Download, Upload as UploadIcon, Loader2, CheckCircle2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -428,6 +428,14 @@ const LiveMonitor = () => {
               </div>
             )}
           </div>
+
+          <p className="text-center text-sm text-muted-foreground">
+            No footage?{" "}
+            <a href="/bioreef-sample.mp4" download className="inline-flex items-center gap-1 text-primary hover:underline">
+              <Download className="h-3.5 w-3.5" /> Download a 45-second sample
+            </a>
+            {" "}from the OzFish dataset (AIMS, CC BY 3.0 AU), then drop it above.
+          </p>
         </div>
       </div>
     );
