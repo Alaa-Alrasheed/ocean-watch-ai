@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { SPECIES, drawBrackets, drawFish, drawTag, fitCanvas, reducedMotion, runWhileVisible } from "./fish";
+import { SPECIES, drawBrackets, drawFish, drawTag, fitCanvas, reducedMotion, runWhileVisible, onResize } from "./fish";
 import { createWaterLight } from "./waterLight";
 import { ambience } from "./sound";
 
@@ -344,7 +344,7 @@ export default function OceanCanvas({ onStats, avoidRef }: Props) {
     };
 
     resize();
-    window.addEventListener("resize", resize);
+    const unobserve = onResize(scene, resize);
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerdown", onDown);
     document.addEventListener("pointerleave", onLeave);
@@ -352,7 +352,7 @@ export default function OceanCanvas({ onStats, avoidRef }: Props) {
     return () => {
       stop();
       light?.dispose();
-      window.removeEventListener("resize", resize);
+      unobserve();
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onDown);
       document.removeEventListener("pointerleave", onLeave);

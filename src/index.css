@@ -63,6 +63,63 @@
     --sidebar-accent-foreground: 195 60% 92%;
     --sidebar-border: 210 30% 18%;
     --sidebar-ring: 174 72% 50%;
+
+    color-scheme: dark;
+  }
+
+  /*
+   * App pages (App.tsx forces .light everywhere except the dark landing page).
+   * Same roles, daylight values: foam background, deep-water ink, and the accents
+   * darkened until text in them clears 4.5:1 on white.
+   */
+  .light {
+    --background: 195 33% 97%;
+    --foreground: 214 52% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 214 52% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 214 52% 13%;
+
+    --primary: 176 88% 26%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 200 30% 92%;
+    --secondary-foreground: 214 52% 13%;
+
+    --muted: 200 28% 93%;
+    --muted-foreground: 213 18% 38%;
+
+    --accent: 196 32% 90%;
+    --accent-foreground: 214 52% 13%;
+
+    --destructive: 0 72% 44%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 205 24% 84%;
+    --input: 205 24% 78%;
+    --ring: 176 88% 26%;
+
+    --coral: 14 78% 44%;
+    --coral-soft: 12 70% 52%;
+    --sand: 34 70% 34%;
+    --bioluminescent: 176 88% 26%;
+    --bioluminescent-glow: 176 70% 36%;
+    --kelp: 150 60% 28%;
+    --teal: 168 70% 28%;
+    --teal-light: 168 60% 34%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 214 52% 13%;
+    --sidebar-primary: 176 88% 26%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 196 32% 90%;
+    --sidebar-accent-foreground: 214 52% 13%;
+    --sidebar-border: 205 24% 84%;
+    --sidebar-ring: 176 88% 26%;
+
+    color-scheme: light;
   }
 }
 

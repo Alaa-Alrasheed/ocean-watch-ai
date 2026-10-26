@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { drawFish, fitCanvas, reducedMotion, runWhileVisible } from "./fish";
+import { drawFish, fitCanvas, reducedMotion, runWhileVisible, onResize } from "./fish";
 import { Scene, seg, useScene } from "./scene";
 
 /**
@@ -212,12 +212,12 @@ function Morph() {
 
     build();
     void document.fonts.load("700 100px Newsreader").then(build); // "321" needs the real font
-    window.addEventListener("resize", build);
+    const unobserve = onResize(canvas, build);
     window.addEventListener("pointermove", onMove);
     const stop = runWhileVisible(canvas, step);
     return () => {
       stop();
-      window.removeEventListener("resize", build);
+      unobserve();
       window.removeEventListener("pointermove", onMove);
     };
   }, []);

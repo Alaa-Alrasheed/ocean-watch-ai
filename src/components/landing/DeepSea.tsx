@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { fitCanvas, reducedMotion } from "./fish";
+import { fitCanvas, reducedMotion, onResize } from "./fish";
 
 /**
  * Fixed background behind the sections below the hero. Scrolling = sinking:
@@ -146,12 +146,12 @@ export default function DeepSea() {
     };
 
     resize();
-    window.addEventListener("resize", resize);
+    const unobserve = onResize(canvas, resize);
     window.addEventListener("pointermove", onMove);
     raf = requestAnimationFrame(step);
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
+      unobserve();
       window.removeEventListener("pointermove", onMove);
     };
   }, []);

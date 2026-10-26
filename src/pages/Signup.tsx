@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import GuestLink from "@/components/GuestLink";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
@@ -322,6 +323,7 @@ const Signup = () => {
           Already have an account?{" "}
           <Link to="/login" className="text-primary hover:underline">Log in</Link>
         </p>
+        <GuestLink />
       </div>
     </div>
   );

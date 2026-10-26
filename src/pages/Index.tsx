@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Download, Fish, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, Download, Fish, Loader2, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGuestEntry } from "@/hooks/use-guest-entry";
 import OceanCanvas, { type SceneStats } from "@/components/landing/OceanCanvas";
 import SpeciesMorph from "@/components/landing/SpeciesMorph";
 import PipelineStage from "@/components/landing/PipelineStage";
@@ -52,7 +53,28 @@ function SoundToggle() {
   );
 }
 
-function Hero({ ctaTo, ctaLabel }: { ctaTo: string; ctaLabel: string }) {
+/** Signed in: go upload. Signed out: one click starts a guest session, no sign-up. */
+function TryItButton() {
+  const { user } = useAuth();
+  const { enter, busy } = useGuestEntry();
+  const inner = (
+    <>
+      {user ? "Upload a video" : "Try it on a video"}
+      {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+    </>
+  );
+  return user ? (
+    <Button asChild size="lg" className="h-12 gap-2 px-7 text-base">
+      <Link to="/data-explorer">{inner}</Link>
+    </Button>
+  ) : (
+    <Button size="lg" className="h-12 gap-2 px-7 text-base" onClick={enter} disabled={busy}>
+      {inner}
+    </Button>
+  );
+}
+
+function Hero() {
   const [stats, setStats] = useState<SceneStats>({ inView: 0, tracked: 0, species: 0, frame: 4800 });
   const onStats = useCallback((s: SceneStats) => setStats(s), []);
   const textRef = useRef<HTMLDivElement>(null);
@@ -92,11 +114,7 @@ function Hero({ ctaTo, ctaLabel }: { ctaTo: string; ctaLabel: string }) {
         </h1>
         <p className="hero-in mt-5 text-sm text-foreground/70 md:hidden" style={{ animationDelay: "2200ms" }}>Tap the water to send a sonar ping.</p>
         <div data-avoid className="hero-in pointer-events-auto mt-8 w-fit md:mt-10" style={{ animationDelay: "1800ms" }}>
-          <Link to={ctaTo}>
-            <Button size="lg" className="h-12 gap-2 px-7 text-base">
-              {ctaLabel} <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          <TryItButton />
         </div>
       </div>
 
@@ -143,16 +161,12 @@ function Stat({ value, from, to, prefix, text, source, mode, range, showAt = ran
 }
 
 const Index = () => {
-  const { user } = useAuth();
-  const ctaTo = user ? "/data-explorer" : "/signup";
-  const ctaLabel = user ? "Upload a video" : "Try it on a video";
-
   return (
     <div className="landing relative isolate min-h-screen overflow-x-clip">
       <DeepSea />
       <DepthGauge />
       <SoundToggle />
-      <Hero ctaTo={ctaTo} ctaLabel={ctaLabel} />
+      <Hero />
 
       <SpeciesMorph />
 
@@ -212,11 +226,7 @@ const Index = () => {
           Upload it and get back species counts, MaxN and diversity indices for the whole video.
         </p>
         <div className="mt-10 flex flex-wrap gap-3">
-          <Link to={ctaTo}>
-            <Button size="lg" className="h-12 gap-2 px-7 text-base">
-              {ctaLabel} <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          <TryItButton />
           <Button asChild size="lg" variant="outline" className="h-12 gap-2 px-7 text-base">
             <a href="/bioreef-sample.mp4" download>
               <Download className="h-4 w-4" /> Sample video (45 s, 15 MB)

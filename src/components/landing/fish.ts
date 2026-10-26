@@ -94,6 +94,22 @@ export function fitCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext
   return [w, h];
 }
 
+/**
+ * Calls `fn` whenever `el`'s rendered size changes. Watches the element itself, not the
+ * window: on iOS Safari a box can change size (toolbar, fonts, layout) without a window
+ * resize, which left the canvas bitmap stretched to the new box. Returns a cleanup.
+ */
+export function onResize(el: Element, fn: () => void): () => void {
+  let w = el.clientWidth, h = el.clientHeight;
+  const ro = new ResizeObserver(() => {
+    if (el.clientWidth === w && el.clientHeight === h) return;
+    w = el.clientWidth; h = el.clientHeight;
+    fn();
+  });
+  ro.observe(el);
+  return () => ro.disconnect();
+}
+
 /** Runs `step` every frame only while `el` is on screen and the tab is visible. */
 export function runWhileVisible(el: Element, step: (t: number) => void): () => void {
   let raf = 0, onScreen = false;

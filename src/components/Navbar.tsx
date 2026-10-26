@@ -11,7 +11,7 @@ const Navbar = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, isGuest, signOut } = useAuth();
 
   // Logged-in only. Logged-out users see no tabs at all.
   const links = user
@@ -33,7 +33,7 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  const initials = (user?.email ?? "?").slice(0, 2).toUpperCase();
+  const initials = isGuest ? "G" : (user?.email ?? "?").slice(0, 2).toUpperCase();
 
   const handleSignOut = async () => {
     setMenuOpen(false);
@@ -86,15 +86,15 @@ const Navbar = () => {
                 <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-border bg-popover shadow-lg">
                   <div className="border-b border-border px-3 py-2">
                     <div className="text-xs text-muted-foreground">Signed in as</div>
-                    <div className="truncate text-sm text-foreground">{user.email}</div>
+                    <div className="truncate text-sm text-foreground">{isGuest ? "Guest" : user.email}</div>
                   </div>
-                  <Link
+                  {!isGuest && <Link
                     to="/profile"
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
                   >
                     <UserIcon className="h-4 w-4" /> Profile
-                  </Link>
+                  </Link>}
                   <button
                     onClick={handleSignOut}
                     className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
@@ -145,13 +145,13 @@ const Navbar = () => {
             ) : user ? (
               <div className="space-y-2">
                 <div className="px-4 py-2 text-xs text-muted-foreground">
-                  Signed in as <span className="text-foreground">{user.email}</span>
+                  Signed in as <span className="text-foreground">{isGuest ? "Guest" : user.email}</span>
                 </div>
-                <Link to="/profile" onClick={() => setOpen(false)} className="block">
+                {!isGuest && <Link to="/profile" onClick={() => setOpen(false)} className="block">
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
                     <UserIcon className="h-4 w-4" /> Profile
                   </Button>
-                </Link>
+                </Link>}
                 <Button
                   variant="ghost"
                   size="sm"

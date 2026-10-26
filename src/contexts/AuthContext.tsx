@@ -6,6 +6,9 @@ interface AuthContextValue {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  /** Signed in with no account (Supabase anonymous sign-in), for demo visitors. */
+  isGuest: boolean;
+  signInAsGuest: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -34,6 +37,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  const signInAsGuest = async () => {
+    if (!isSupabaseConfigured) throw new Error("Supabase is not configured");
+    const { error } = await supabase.auth.signInAnonymously();
+    if (error) throw error;
+  };
+
   const signOut = async () => {
     if (!isSupabaseConfigured) return;
     await supabase.auth.signOut();
@@ -41,7 +50,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user: session?.user ?? null, session, loading, signOut }}
+      value={{
+        user: session?.user ?? null,
+        session,
+        loading,
+        isGuest: session?.user?.is_anonymous ?? false,
+        signInAsGuest,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { SPECIES, drawBrackets, drawFish, drawTag, fitCanvas, reducedMotion, runWhileVisible } from "./fish";
+import { SPECIES, drawBrackets, drawFish, drawTag, fitCanvas, reducedMotion, runWhileVisible, onResize } from "./fish";
 import { createWaterLight } from "./waterLight";
 import { Scene, ease, seg, useScene } from "./scene";
 
@@ -198,9 +198,9 @@ function Stage() {
     };
 
     resize();
-    window.addEventListener("resize", resize);
+    const unobserve = onResize(canvas, resize);
     const stop = runWhileVisible(canvas, step);
-    return () => { stop(); light?.dispose(); window.removeEventListener("resize", resize); };
+    return () => { stop(); light?.dispose(); unobserve(); };
   }, []);
 
   return (
