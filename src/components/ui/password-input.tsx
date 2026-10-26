@@ -19,6 +19,10 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         />
         <button
           type="button"
+          // keep focus in the field: on iOS Safari the blur closed the keyboard, the page
+          // jumped and the tap was lost
+          onPointerDown={(e) => e.preventDefault()}
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? "Hide password" : "Show password"}
           tabIndex={-1}
