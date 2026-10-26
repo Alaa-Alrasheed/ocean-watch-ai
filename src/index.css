@@ -168,6 +168,15 @@
   transform: translate3d(0, calc((1 - min(1, var(--enter) * 1.8)) * 70px), 0);
 }
 
+/* Data Explorer: a scan line sweeping the footage while the worker analyses it */
+@keyframes scan { from { top: -10%; } to { top: 110%; } }
+.scan-line {
+  position: absolute; left: 0; right: 0; height: 18%;
+  background: linear-gradient(180deg, transparent, hsl(var(--primary) / 0.16) 85%, hsl(var(--primary) / 0.7) 100%);
+  animation: scan 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  pointer-events: none;
+}
+
 /* UAE map: sonar sweep and pings over Khor Fakkan */
 @keyframes spin { to { transform: rotate(360deg); } }
 .map-sweep { transform-box: view-box; animation: spin 6s linear infinite; }
@@ -199,7 +208,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .stagger > :nth-child(n), .hero-in, .fade-swap { animation: none; opacity: 1; }
-  .map-sweep, .map-ping { animation: none; }
+  .map-sweep, .map-ping, .scan-line { animation: none; }
+  .scan-line { display: none; }
   .scene-rise, .scene-recede, .reveal-up { transform: none; }
 }
 

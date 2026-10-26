@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PageHeader } from "@/components/PageHeader";
 import { Dataset, DatasetFrame, RunInfo } from "@/data/monitorDatasets";
 import DatasetFrameView from "@/components/monitor/DatasetFrameView";
+import ProcessingView from "@/components/monitor/ProcessingView";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -203,8 +204,16 @@ const LiveMonitor = () => {
     if (!user || !unfinished) return;
     const timer = setInterval(async () => {
       const runs = await loadRuns(unfinished.split(","));
-      setDatasets((prev) => prev.map((d) => (runs[d.id] ? { ...d, run: runs[d.id] } : d)));
-    }, 8000);
+      setDatasets((prev) => prev.map((d) => {
+        const r = runs[d.id];
+        if (!r) return d;
+        if (r.status === "done" && d.run?.status !== "done")
+          toast({ title: `"${d.name}" is ready`, description: `${r.fishTracked ?? 0} fish tracked, ${r.richness ?? 0} species.` });
+        if (r.status === "failed" && d.run?.status !== "failed")
+          toast({ title: `"${d.name}" couldn't be analysed`, description: r.error ?? undefined, variant: "destructive" });
+        return { ...d, run: r };
+      }));
+    }, 4000);
     return () => clearInterval(timer);
   }, [user, unfinished]);
 
@@ -443,6 +452,8 @@ const LiveMonitor = () => {
 
   // Video loaded: explorer UI
   const run = dataset.run;
+  // saved but not analysed yet; right after upload the run row may not have been polled yet
+  const analysing = !!storagePathById[dataset.id] && (!run || run.status === "pending" || run.status === "processing");
   return (
     <div className="min-h-screen pt-16">
       <div className="stagger mx-auto max-w-5xl space-y-6 px-4 py-10 sm:px-6 lg:px-8">
@@ -465,7 +476,8 @@ const LiveMonitor = () => {
             </Select>
             <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {dataset.date}</span>
             <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {dataset.duration}</span>
-            {run && (
+            {/* while analysing, the progress view below carries the status */}
+            {run && !analysing && (
               <span
                 className={`flex items-center gap-1.5 ${run.status === "failed" ? "text-destructive" : "text-foreground"}`}
                 title={run.error ?? undefined}
@@ -508,12 +520,6 @@ const LiveMonitor = () => {
               />
             </div>
           </div>
-          {/* analysis progress along the bottom edge while the worker runs */}
-          {run?.status === "processing" && (
-            <div className="absolute inset-x-0 bottom-0 h-0.5 bg-border">
-              <div className="h-full bg-primary transition-[width] duration-700 ease-out" style={{ width: `${run.progress * 100}%` }} />
-            </div>
-          )}
         </div>
 
         {/* Delete confirmation */}
@@ -540,7 +546,14 @@ const LiveMonitor = () => {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Full-width frame viewer */}
+        {/* Full-width frame viewer, or the progress view while the worker runs */}
+        {analysing ? (
+          <ProcessingView
+            run={run ?? { id: "", status: "pending", progress: 0, error: null, fishTracked: null, richness: null }}
+            videoUrl={dataset.videoUrl}
+            name={dataset.name}
+          />
+        ) : (
         <DatasetFrameView
           frame={frame}
           currentIndex={currentFrameIdx}
@@ -553,6 +566,7 @@ const LiveMonitor = () => {
           onSpeedChange={setPlaybackSpeed}
           videoUrl={shownVideoUrl}
         />
+        )}
       </div>
     </div>
   );
