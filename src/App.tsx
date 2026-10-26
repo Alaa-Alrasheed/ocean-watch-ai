@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
@@ -26,18 +25,6 @@ function ScrollToTop() {
   return null;
 }
 
-/** App pages are light. The landing page is the underwater story with hand-painted
- *  dark canvases, so it renders dark. */
-function ThemeRoot({ children }: { children: React.ReactNode }) {
-  const { pathname } = useLocation();
-  return (
-    <ThemeProvider attribute="class" enableSystem={false}
-                   forcedTheme={pathname === "/" ? "dark" : "light"}>
-      {children}
-    </ThemeProvider>
-  );
-}
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -45,7 +32,6 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <ThemeRoot>
           <ScrollToTop />
           <Navbar />
           <Routes>
@@ -59,7 +45,6 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          </ThemeRoot>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
