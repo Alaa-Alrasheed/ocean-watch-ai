@@ -19,7 +19,9 @@ function DepthGauge() {
   useEffect(() => {
     const onScroll = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      setDepth(max > 0 ? (window.scrollY / max) * 40 : 0);
+      const progress = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+      setDepth(progress * 40);
+      ambience.setDepth(progress);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
