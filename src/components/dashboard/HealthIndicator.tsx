@@ -37,7 +37,7 @@ export function HealthIndicator({ index }: { index: BiodiversityIndex }) {
   const decimals = Number.isInteger(index.value) ? 0 : 2;
 
   return (
-    <div className="panel space-y-3 p-5">
+    <div className="panel lift space-y-3 p-5">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm text-muted-foreground">{index.name}</h3>
         <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[index.status]} ${statusBg[index.status]}`}>

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import DeepSea from "@/components/landing/DeepSea";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -25,6 +26,12 @@ function ScrollToTop() {
   return null;
 }
 
+/** App pages sit in the same water as the landing page, kept calm (the landing draws its own). */
+function AppWater() {
+  const { pathname } = useLocation();
+  return pathname === "/" ? null : <DeepSea calm />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -34,6 +41,7 @@ const App = () => (
         <BrowserRouter>
           <ScrollToTop />
           <Navbar />
+          <AppWater />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/dashboard" element={<Dashboard />} />

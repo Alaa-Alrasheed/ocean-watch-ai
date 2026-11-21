@@ -3,8 +3,8 @@ import { FishSpecies } from "@/data/marineData";
 
 // Fixed order, never cycled: the 7 most abundant species get a hue each and the rest fold into a
 // neutral "Other". Checked with the dataviz palette validator against the dark panel (all pass).
-const COLORS = ["#10a49e", "#d2643c", "#4a79c6", "#b2912e", "#9d56ad", "#399d57", "#5c5fac"];
-const OTHER = "#6a7a8b";
+export const COLORS = ["#10a49e", "#d2643c", "#4a79c6", "#b2912e", "#9d56ad", "#399d57", "#5c5fac"];
+export const OTHER = "#6a7a8b";
 
 export function SpeciesChart({ species }: { species: FishSpecies[] }) {
   const top = species.slice(0, COLORS.length);

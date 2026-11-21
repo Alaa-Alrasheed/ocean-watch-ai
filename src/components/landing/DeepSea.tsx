@@ -6,6 +6,9 @@ import { fitCanvas, reducedMotion, onResize } from "./fish";
  * the water darkens, marine snow streams upward with parallax, bioluminescent
  * plankton light up deeper down and flare where the cursor passes (as real
  * plankton do when disturbed), and jellyfish drift through the deep end.
+ * Near the top the hero's light shafts carry on and fade, so the hero sinks into
+ * this rather than ending on an edge. `calm`: the quiet version behind the app
+ * pages (fixed shallow depth, no jellyfish).
  */
 
 interface Mote { x: number; y: number; z: number; r: number; tw: number; glow: number; hue: number }
@@ -62,7 +65,7 @@ function drawJelly(ctx: CanvasRenderingContext2D, j: Jelly, t: number, alpha: nu
   ctx.restore();
 }
 
-export default function DeepSea() {
+export default function DeepSea({ calm = false }: { calm?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -95,14 +98,30 @@ export default function DeepSea() {
       raf = requestAnimationFrame(step);
       const sy = window.scrollY, dy = sy - lastY;
       lastY = sy;
-      if (sy < 1) return; // the hero covers the whole screen
-      const p = sy / Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const p = calm ? 0.03 : sy / Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const surface = calm ? 0.55 : 1 - smooth(0, 0.14, p); // light from above, gone a few screens down
 
       const g = ctx.createLinearGradient(0, 0, 0, h);
-      g.addColorStop(0, `hsl(${212 + 8 * p} 52% ${8 - 4.5 * p}%)`);
+      g.addColorStop(0, `hsl(${205 + 15 * p} 55% ${8 - 4.5 * p + 4 * surface}%)`);
       g.addColorStop(1, `hsl(${218 + 6 * p} 58% ${5 - 3 * p}%)`);
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, w, h);
+
+      if (surface > 0.01) { // the hero's god rays, fading with depth
+        ctx.globalCompositeOperation = "lighter";
+        for (let i = 0; i < 6; i++) {
+          const top = (i / 6) * w * 1.2 - w * 0.1 + Math.sin(t * 0.0003 + i * 1.7) * 50, spread = 50 + (i % 3) * 40;
+          const rg = ctx.createLinearGradient(0, 0, 0, h * 0.8);
+          rg.addColorStop(0, `hsla(185, 90%, 75%, ${(0.045 + 0.025 * Math.sin(t * 0.0006 + i * 2.1)) * surface})`);
+          rg.addColorStop(1, "hsla(185, 90%, 75%, 0)");
+          ctx.fillStyle = rg;
+          ctx.beginPath();
+          ctx.moveTo(top - spread * 0.3, 0); ctx.lineTo(top + spread * 0.3, 0);
+          ctx.lineTo(top + spread * 2.4 + 120, h * 0.8); ctx.lineTo(top - spread * 0.6 + 120, h * 0.8);
+          ctx.fill();
+        }
+        ctx.globalCompositeOperation = "source-over";
+      }
 
       ctx.fillStyle = "rgba(200,230,245,1)";
       for (const m of snow) {
@@ -113,7 +132,7 @@ export default function DeepSea() {
       }
 
       ctx.globalCompositeOperation = "lighter";
-      const bio = smooth(0.12, 0.55, p);
+      const bio = calm ? 0.3 : smooth(0.12, 0.55, p);
       for (const m of plankton) {
         drift(m, dy, 0.05, 10);
         const d2 = (m.x - mouse.x) ** 2 + (m.y - mouse.y) ** 2;
@@ -129,7 +148,7 @@ export default function DeepSea() {
       }
       ctx.globalAlpha = 1;
 
-      const ja = smooth(0.22, 0.5, p);
+      const ja = calm ? 0 : smooth(0.22, 0.5, p);
       if (ja > 0.01) for (const j of jellies) {
         const pulse = 0.5 + 0.5 * Math.sin(t * 0.0018 + j.phase);
         j.y -= (0.15 + 0.35 * pulse) * j.z + dy * j.z * 0.6;
@@ -154,7 +173,7 @@ export default function DeepSea() {
       unobserve();
       window.removeEventListener("pointermove", onMove);
     };
-  }, []);
+  }, [calm]);
 
   return <canvas ref={ref} className="pointer-events-none fixed inset-0 -z-10 h-screen w-screen" aria-hidden="true" />;
 }

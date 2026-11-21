@@ -270,7 +270,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen pt-16">
       {/* survey picker: sticks under the navbar while the page scrolls */}
-      <div className="sticky top-16 z-30 border-b border-border/60 bg-background/80 backdrop-blur-md">
+      <div className="sticky top-16 z-30 border-b border-border/60 bg-background/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
           <div className="hidden min-w-0 md:block">
             <p className="truncate text-sm text-foreground">{selectedFixture.label}</p>
@@ -296,6 +296,7 @@ const Dashboard = () => {
           totalSpecies={ruleEngineOutput?.indices.S}
           totalIndividuals={ruleEngineOutput?.indices.totalCount}
           ecosystemStatus={dashboardCompositeStatus}
+          species={dashboardSpeciesData}
         />
 
         <section>

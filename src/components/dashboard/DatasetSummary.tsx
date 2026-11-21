@@ -97,7 +97,7 @@ export function DatasetSummary({
 
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map((metric) => (
-          <div key={metric.label} className="rounded-lg border border-border bg-secondary/30 p-4">
+          <div key={metric.label} className="lift rounded-lg border border-border bg-secondary/30 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <p className="eyebrow">{metric.label}</p>
               <metric.icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />

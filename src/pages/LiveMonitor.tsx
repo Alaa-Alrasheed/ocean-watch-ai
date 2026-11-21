@@ -21,6 +21,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { uploadDataset } from "@/lib/uploadDataset";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/hooks/use-toast";
+import FishSchool from "@/components/FishSchool";
+import { COLORS } from "@/components/dashboard/SpeciesChart";
+
+/** Faint fish passing through the empty drop zone; they wake up while a file is dragged over. */
+const DROP_FISH = [...COLORS, ...COLORS.slice(0, 3)].map((color, i) => ({ name: String(i), color }));
 
 // Empty stub frame so DatasetFrameView doesn't crash when frames[] is empty.
 const EMPTY_FRAME: DatasetFrame = {
@@ -385,7 +390,7 @@ const LiveMonitor = () => {
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
-            className={`panel cursor-pointer border-dashed p-12 text-center transition-colors duration-300 ${
+            className={`panel relative cursor-pointer overflow-hidden border-dashed p-12 text-center transition-colors duration-300 ${
               dragOver ? "border-primary bg-primary/5" : "hover:border-primary/50"
             } ${processing ? "pointer-events-none opacity-60" : ""}`}
             onClick={() => !processing && fileInputRef.current?.click()}
@@ -401,8 +406,9 @@ const LiveMonitor = () => {
               }}
             />
 
+            {!processing && <FishSchool fish={DROP_FISH} faint quiet excited={dragOver} className="pointer-events-none absolute inset-0 h-full w-full" />}
             {processing ? (
-              <div className="space-y-4 max-w-md mx-auto">
+              <div className="relative space-y-4 max-w-md mx-auto">
                 <div className="flex items-center justify-center gap-2">
                   {uploadStage === "finalizing" ? (
                     <Loader2 className="w-5 h-5 text-primary animate-spin" />
@@ -429,7 +435,7 @@ const LiveMonitor = () => {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="relative space-y-4">
                 <UploadIcon className="mx-auto h-8 w-8 text-primary" />
                 <div>
                   <p className="font-display text-2xl">Drop a video here</p>

@@ -92,7 +92,10 @@ function Hero() {
           textRef.current.style.transform = `translateY(${p * 120}px)`;
           textRef.current.style.opacity = String(1 - p * 1.4);
         }
-        if (sceneRef.current) sceneRef.current.style.transform = `scale(${1 + p * 0.2})`;
+        if (sceneRef.current) { // push in and dissolve into the deep sea behind
+          sceneRef.current.style.transform = `scale(${1 + p * 0.2})`;
+          sceneRef.current.style.opacity = String(1 - p * 0.95);
+        }
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -101,11 +104,10 @@ function Hero() {
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden">
-      <div ref={sceneRef} className="absolute inset-0 will-change-transform">
+      <div ref={sceneRef} className="absolute inset-0 will-change-transform [mask-image:linear-gradient(#000_70%,transparent)]">
         <OceanCanvas onStats={onStats} avoidRef={textRef} />
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_70%,transparent_30%,hsl(216_55%_6%/0.65)_100%)]" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-[hsl(212_52%_8%)]" />
 
       <div ref={textRef} className="pointer-events-none absolute inset-x-0 bottom-[13%] mx-auto max-w-7xl px-6 will-change-transform md:px-10">
         <h1 className="hero-in font-display text-[3.4rem] leading-[0.98] tracking-tight drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] sm:text-7xl md:text-[6.2rem]" style={{ animationDelay: "1300ms" }}>

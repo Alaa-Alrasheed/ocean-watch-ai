@@ -22,7 +22,7 @@ export function BiodiversityScore({ score, status }: BiodiversityScoreProps) {
   const offset = circumference - (shown / 100) * circumference;
 
   return (
-    <div className="panel flex flex-col items-center justify-center gap-4 p-6">
+    <div className="panel lift flex flex-col items-center justify-center gap-4 p-6">
       <h3 className="eyebrow text-center">Composite score</h3>
 
       <div className="relative h-36 w-36">
