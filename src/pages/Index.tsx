@@ -205,15 +205,15 @@ const Index = () => {
       <Scene height="260vh" className="flex items-center">
         <div className="scene-recede mx-auto grid w-full max-w-6xl items-center gap-6 px-6 md:grid-cols-[1fr_1.7fr] md:gap-12 md:px-10">
           <div className="scene-rise">
-            <h2 className="text-balance font-display text-4xl leading-tight md:text-6xl">Tested on UAE footage</h2>
+            <h2 className="text-balance font-display text-4xl leading-tight md:text-6xl">Trained on our own labels</h2>
             <div className="mt-5 font-display text-6xl tabular-nums md:mt-10 md:text-8xl">
-              <Count to={90.6} decimals={1} suffix="%" range={[0.3, 0.75]} />
+              <Count to={85.4} decimals={1} suffix="%" range={[0.3, 0.75]} />
             </div>
             <p className="mt-2 max-w-xs leading-relaxed text-muted-foreground">
-              of the fish in survey video from Khor Fakkan were found by the detector.
+              of the fish in held-out survey frames, boxed by our team, are found by the detector.
             </p>
             <p className="mt-6 hidden max-w-sm text-sm text-muted-foreground sm:block">
-              In collaboration with Fujairah Research Centre and the University of Khorfakkan.
+              In collaboration with Fujairah Research Centre and the University of Khorfakkan. Footage from Khor Fakkan is being labelled now.
             </p>
           </div>
           <UaeMap />

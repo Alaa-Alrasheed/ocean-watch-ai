@@ -4,8 +4,8 @@ import { clamp01, ease, lerp, seg, useScene } from "./scene";
 
 const LEVELS = [
   { label: "Family", value: 97.0, r: 128, color: "hsl(195 35% 72%)" },
-  { label: "Genus", value: 94.2, r: 104, color: "hsl(178 45% 56%)" },
-  { label: "Species", value: 87.6, r: 80, color: "hsl(168 70% 46%)" },
+  { label: "Genus", value: 94.6, r: 104, color: "hsl(178 45% 56%)" },
+  { label: "Species", value: 87.1, r: 80, color: "hsl(168 70% 46%)" },
 ];
 
 /**
